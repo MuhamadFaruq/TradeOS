@@ -8,11 +8,27 @@ class IsarService {
   static late Isar isar;
 
   static Future<void> init() async {
+    // Check if instance already exists
+    if (Isar.getInstance() != null) {
+      isar = Isar.getInstance()!;
+      return;
+    }
+
     final dir = await getApplicationDocumentsDirectory();
-    
+
     isar = await Isar.open(
       [TradeSchema, UserProfileSchema, EconomicEventSchema],
       directory: dir.path,
     );
   }
+
+  // Helper method to get or initialize instance
+  static Future<Isar> getInstance() async {
+    if (Isar.getInstance() != null) {
+      return Isar.getInstance()!;
+    }
+    await init();
+    return isar;
+  }
 }
+

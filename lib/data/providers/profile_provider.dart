@@ -13,23 +13,33 @@ class ProfileNotifier extends StateNotifier<UserProfile?> {
   }
 
   Future<void> _loadProfile() async {
-    final profile = await IsarService.isar.userProfiles.where().findFirst();
-    if (profile == null) {
-      // Create default profile if not exists
-      final newProfile = UserProfile();
-      await IsarService.isar.writeTxn(() async {
-        await IsarService.isar.userProfiles.put(newProfile);
-      });
-      state = newProfile;
-    } else {
-      state = profile;
+    try {
+      final isar = await IsarService.getInstance();
+      final profile = await isar.userProfiles.where().findFirst();
+      if (profile == null) {
+        // Create default profile if not exists
+        final newProfile = UserProfile();
+        await isar.writeTxn(() async {
+          await isar.userProfiles.put(newProfile);
+        });
+        state = newProfile;
+      } else {
+        state = profile;
+      }
+    } catch (e) {
+      print('Error loading profile: $e');
     }
   }
 
   Future<void> updateProfile(UserProfile updatedProfile) async {
-    await IsarService.isar.writeTxn(() async {
-      await IsarService.isar.userProfiles.put(updatedProfile);
-    });
-    state = updatedProfile;
+    try {
+      final isar = await IsarService.getInstance();
+      await isar.writeTxn(() async {
+        await isar.userProfiles.put(updatedProfile);
+      });
+      state = updatedProfile;
+    } catch (e) {
+      print('Error updating profile: $e');
+    }
   }
 }

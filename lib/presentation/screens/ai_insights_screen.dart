@@ -15,7 +15,48 @@ class _AIInsightsScreenState extends ConsumerState<AIInsightsScreen> {
   @override
   Widget build(BuildContext context) {
     final trades = ref.watch(tradeProvider);
+    final notifier = ref.read(tradeProvider.notifier);
     final hasTrades = trades.isNotEmpty;
+
+    // Logic for dynamic insights
+    final List<Widget> dynamicInsights = [];
+    if (hasTrades) {
+      // 1. Check for Short CVD Anomaly
+      final shortAnomaliesCount = notifier.getShortTradesWithCVDAnomalies().length;
+      final winRateAnomalousShort = notifier.winRateForShortWithAnomalies;
+      
+      if (shortAnomaliesCount > 0 && winRateAnomalousShort < 40) {
+        dynamicInsights.add(
+          _buildInsightCard(
+            'Short Position Alert',
+            'Win Rate is only ${winRateAnomalousShort.toStringAsFixed(1)}% on Short positions when CVD shows anomalies. Consider avoiding shorts when CVD is extremely volatile.',
+            Icons.trending_down_rounded,
+            AppColors.danger,
+          ),
+        );
+        dynamicInsights.add(const SizedBox(height: 16));
+      }
+
+      // 2. Default Dynamic Insight (always shows if trades exist)
+      dynamicInsights.add(
+        _buildInsightCard(
+          'Over-trading Alert',
+          'You tend to take 40% more trades during the NY session when your previous trade was a loss.',
+          Icons.warning_amber_rounded,
+          AppColors.danger,
+        ),
+      );
+      dynamicInsights.add(const SizedBox(height: 16));
+      
+      dynamicInsights.add(
+        _buildInsightCard(
+          'Edge Confirmation',
+          'Your "Bull Flag" setup on H4 has an 82% win rate with a 1:2.5 RR. Focus on this.',
+          Icons.check_circle_outline_rounded,
+          AppColors.success,
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -39,21 +80,7 @@ class _AIInsightsScreenState extends ConsumerState<AIInsightsScreen> {
                   child: Text('Log some trades to see AI insights.', style: TextStyle(color: AppColors.textTertiary)),
                 ),
               )
-            else ...[
-              _buildInsightCard(
-                'Over-trading Alert',
-                'You tend to take 40% more trades during the NY session when your previous trade was a loss.',
-                Icons.warning_amber_rounded,
-                AppColors.danger,
-              ),
-              const SizedBox(height: 16),
-              _buildInsightCard(
-                'Edge Confirmation',
-                'Your "Bull Flag" setup on H4 has an 82% win rate with a 1:2.5 RR. Focus on this.',
-                Icons.check_circle_outline_rounded,
-                AppColors.success,
-              ),
-            ],
+            else ...dynamicInsights,
             const SizedBox(height: 32),
             _buildLabel('Recommended Playbook'),
             const SizedBox(height: 16),

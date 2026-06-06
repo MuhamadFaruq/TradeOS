@@ -13,7 +13,10 @@ import 'data/models/economic_event.dart';
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     try {
+      // Initialize services in background isolate
+      await NotificationService.init();
       await IsarService.init();
+
       final events = await EconomicCalendarService().fetchEvents();
       final highImpact = events.where((e) => e.impact == Impact.high).toList();
 
@@ -26,6 +29,7 @@ void callbackDispatcher() {
       }
       return true;
     } catch (e) {
+      print('Background task error: $e');
       return false;
     }
   });

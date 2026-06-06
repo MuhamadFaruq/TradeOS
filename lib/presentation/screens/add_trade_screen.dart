@@ -25,6 +25,16 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
   final _amountController = TextEditingController();
   final _leverageController = TextEditingController(text: '1');
   final _notesController = TextEditingController();
+  final _cvdController = TextEditingController();
+  final _volumeImbalanceController = TextEditingController();
+  final _totalVolumeController = TextEditingController();
+  final _durationMinutesController = TextEditingController();
+  final _stopLossController = TextEditingController();
+  final _takeProfitController = TextEditingController();
+
+  // Screenshot tracking
+  final List<String> _beforeEntryScreenshots = [];
+  final List<String> _afterExitScreenshots = [];
 
   @override
   void dispose() {
@@ -35,6 +45,12 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
     _amountController.dispose();
     _leverageController.dispose();
     _notesController.dispose();
+    _cvdController.dispose();
+    _volumeImbalanceController.dispose();
+    _totalVolumeController.dispose();
+    _durationMinutesController.dispose();
+    _stopLossController.dispose();
+    _takeProfitController.dispose();
     super.dispose();
   }
 
@@ -44,7 +60,7 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
     // Reset error
     setState(() => _validationError = null);
 
-    // Validation
+    // Mandatory Fields validation
     if (_pairController.text.isEmpty) {
       setState(() => _validationError = 'Please enter trading pair');
       return;
@@ -56,27 +72,21 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
       return;
     }
 
+    // Optional fields with defaults
     final exitPrice = double.tryParse(_exitPriceController.text);
-    if (exitPrice == null || exitPrice <= 0) {
-      setState(() => _validationError = 'Please enter valid exit price');
-      return;
-    }
-
-    final amount = double.tryParse(_amountController.text);
-    if (amount == null || amount <= 0) {
-      setState(() => _validationError = 'Please enter valid amount');
-      return;
-    }
-
-    if (_strategyController.text.isEmpty) {
-      setState(() => _validationError = 'Please select a strategy');
-      return;
-    }
-
-    // PnL calculation
+    final amount = double.tryParse(_amountController.text) ?? 0.0;
     final leverage = double.tryParse(_leverageController.text) ?? 1.0;
-    final pnl = ((exitPrice - entryPrice) / entryPrice) * amount * leverage * (_direction == 'LONG' ? 1 : -1);
-    final pnlPercentage = (pnl / amount) * 100;
+    
+    // Status and PnL calculation
+    TradeStatus status = TradeStatus.open;
+    double pnl = 0.0;
+    double pnlPercentage = 0.0;
+
+    if (exitPrice != null && exitPrice > 0) {
+      pnl = ((exitPrice - entryPrice) / entryPrice) * amount * leverage * (_direction == 'LONG' ? 1 : -1);
+      pnlPercentage = amount > 0 ? (pnl / amount) * 100 : 0.0;
+      status = pnl >= 0 ? TradeStatus.won : TradeStatus.lost;
+    }
 
     final trade = Trade.create(
       pair: _pairController.text,
@@ -86,17 +96,38 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
       amount: amount,
       pnl: pnl,
       pnlPercentage: pnlPercentage,
-      status: pnl >= 0 ? TradeStatus.won : TradeStatus.lost,
+      status: status,
       date: DateTime.now(),
-      strategy: _strategyController.text,
-      notes: _notesController.text,
+      strategy: _strategyController.text.isNotEmpty ? _strategyController.text : null,
+      notes: _notesController.text.isNotEmpty ? _notesController.text : null,
       emotion: _emotion,
       session: _session,
       confidence: _confidence.toInt(),
     );
 
     trade.leverage = leverage;
-    trade.isLong = _direction == 'LONG';
+
+    // Add advanced metrics
+    trade.cvd = double.tryParse(_cvdController.text);
+    trade.volumeImbalance = double.tryParse(_volumeImbalanceController.text);
+    trade.totalVolume = double.tryParse(_totalVolumeController.text);
+    trade.durationMinutes = int.tryParse(_durationMinutesController.text);
+    trade.stopLossPrice = double.tryParse(_stopLossController.text);
+    trade.takeProfitPrice = double.tryParse(_takeProfitController.text);
+
+    // Add screenshots
+    if (_beforeEntryScreenshots.isNotEmpty) {
+      trade.beforeEntryScreenshots = List.from(_beforeEntryScreenshots);
+    }
+    if (_afterExitScreenshots.isNotEmpty) {
+      trade.afterExitScreenshots = List.from(_afterExitScreenshots);
+    }
+
+    // Calculate RR if SL and TP exist
+    if (trade.stopLossPrice != null && trade.takeProfitPrice != null && trade.stopLossPrice != 0) {
+      trade.riskRewardRatio = (trade.takeProfitPrice! - trade.entryPrice).abs() / 
+                            (trade.stopLossPrice! - trade.entryPrice).abs();
+    }
 
     ref.read(tradeProvider.notifier).addTrade(trade);
 
@@ -181,9 +212,19 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
             _buildLabel('Risk Management'),
             Row(
               children: [
-                Expanded(child: _buildInputField('Stop Loss')),
+                Expanded(child: _buildInputField('Stop Loss', controller: _stopLossController, inputType: TextInputType.number)),
                 const SizedBox(width: 12),
-                Expanded(child: _buildInputField('Take Profit')),
+                Expanded(child: _buildInputField('Take Profit', controller: _takeProfitController, inputType: TextInputType.number)),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+            _buildLabel('Order Flow Metrics (Optional)'),
+            Row(
+              children: [
+                Expanded(child: _buildInputField('CVD (-1.0 to 1.0)', controller: _cvdController, inputType: TextInputType.number)),
+                const SizedBox(width: 12),
+                Expanded(child: _buildInputField('Vol Imbalance', controller: _volumeImbalanceController, inputType: TextInputType.number)),
               ],
             ),
             
@@ -215,9 +256,9 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
             _buildLabel('Screenshots (Before & After)'),
             Row(
               children: [
-                Expanded(child: _buildScreenshotUploader('Before')),
+                Expanded(child: _buildScreenshotUploader('Before', _beforeEntryScreenshots.length)),
                 const SizedBox(width: 16),
-                Expanded(child: _buildScreenshotUploader('After')),
+                Expanded(child: _buildScreenshotUploader('After', _afterExitScreenshots.length)),
               ],
             ),
             
@@ -294,21 +335,45 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
     );
   }
 
-  Widget _buildScreenshotUploader(String label) {
-    return Container(
-      height: 80,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white10),
-        color: Colors.white.withValues(alpha: 0.02),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.add_a_photo_rounded, color: AppColors.textTertiary, size: 20),
-          const SizedBox(height: 4),
-          Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 10)),
-        ],
+  Widget _buildScreenshotUploader(String label, int count) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (label == 'Before') {
+            _beforeEntryScreenshots.add('mock_path_before_${_beforeEntryScreenshots.length + 1}.png');
+          } else {
+            _afterExitScreenshots.add('mock_path_after_${_afterExitScreenshots.length + 1}.png');
+          }
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Mock screenshot added to $label'), duration: const Duration(seconds: 1)),
+        );
+      },
+      child: Container(
+        height: 80,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: count > 0 ? AppColors.primary : Colors.white10),
+          color: count > 0
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : Colors.white.withValues(alpha: 0.02),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.add_a_photo_rounded,
+                color: count > 0 ? AppColors.primary : AppColors.textTertiary, size: 20),
+            const SizedBox(height: 4),
+            Text(
+              count > 0 ? '$label ($count)' : label,
+              style: TextStyle(
+                color: count > 0 ? AppColors.primary : AppColors.textTertiary,
+                fontSize: 10,
+                fontWeight: count > 0 ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

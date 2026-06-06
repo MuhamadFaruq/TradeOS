@@ -11,31 +11,66 @@ class AnalyticsDashboard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final trades = ref.watch(tradeProvider);
     final notifier = ref.read(tradeProvider.notifier);
-    
+
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          const SliverAppBar(
-            backgroundColor: AppColors.background,
-            pinned: true,
-            title: Text('Performance Analytics', style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.all(20),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                _buildEquitySection(context, trades.length, notifier.winRate, notifier.profitFactor),
-                const SizedBox(height: 30),
-                _buildPnLHeatmap(context, trades),
-                const SizedBox(height: 30),
-                _buildSessionAnalytics(context),
-                const SizedBox(height: 30),
-                _buildSetupBreakdown(context, trades),
-                const SizedBox(height: 100),
-              ]),
+      body: DefaultTabController(
+        length: 2,
+        child: CustomScrollView(
+          slivers: [
+            const SliverAppBar(
+              backgroundColor: AppColors.background,
+              pinned: true,
+              title: Text('Performance Analytics', style: TextStyle(fontWeight: FontWeight.bold)),
+              bottom: TabBar(
+                tabs: [
+                  Tab(text: 'Overall'),
+                  Tab(text: 'Long vs Short'),
+                ],
+                indicatorColor: AppColors.primary,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: AppColors.textTertiary,
+              ),
             ),
-          ),
-        ],
+            SliverPadding(
+              padding: const EdgeInsets.all(20),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  TabBarView(
+                    children: [
+                      // Tab 1: Overall Stats
+                      SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _buildEquitySection(context, trades.length, notifier.winRate,
+                                notifier.profitFactor),
+                            const SizedBox(height: 30),
+                            _buildPnLHeatmap(context, trades),
+                            const SizedBox(height: 30),
+                            _buildSessionAnalytics(context),
+                            const SizedBox(height: 30),
+                            _buildSetupBreakdown(context, trades),
+                            const SizedBox(height: 100),
+                          ],
+                        ),
+                      ),
+                      // Tab 2: Long vs Short Comparison
+                      SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _buildLongVsShortComparison(context, notifier),
+                            const SizedBox(height: 30),
+                            _buildDirectionBreakdown(context, notifier),
+                            const SizedBox(height: 100),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ]),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -50,7 +85,9 @@ class AnalyticsDashboard extends ConsumerWidget {
           SizedBox(
             height: 200,
             width: double.infinity,
-            child: CustomPaint(painter: DetailedChartPainter()),
+            child: RepaintBoundary(
+              child: CustomPaint(painter: DetailedChartPainter()),
+            ),
           ),
           const SizedBox(height: 20),
           Row(
@@ -66,7 +103,167 @@ class AnalyticsDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildSimpleStat(String label, String value) {
+  Widget _buildLongVsShortComparison(BuildContext context, dynamic notifier) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Position Comparison', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: GlassCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: AppColors.success,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('LONG', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _buildComparisonStat('Trades', '${notifier.longTradeCount}'),
+                    const SizedBox(height: 8),
+                    _buildComparisonStat('Win Rate', '${notifier.longWinRate.toStringAsFixed(1)}%'),
+                    const SizedBox(height: 8),
+                    _buildComparisonStat('Profit Factor', notifier.longProfitFactor.toStringAsFixed(2)),
+                    const SizedBox(height: 8),
+                    _buildComparisonStat('P&L', '\$${notifier.longTotalPnL.toStringAsFixed(0)}',
+                        notifier.longTotalPnL >= 0 ? AppColors.success : AppColors.danger),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: GlassCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: AppColors.danger,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('SHORT', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _buildComparisonStat('Trades', '${notifier.shortTradeCount}'),
+                    const SizedBox(height: 8),
+                    _buildComparisonStat('Win Rate', '${notifier.shortWinRate.toStringAsFixed(1)}%'),
+                    const SizedBox(height: 8),
+                    _buildComparisonStat('Profit Factor', notifier.shortProfitFactor.toStringAsFixed(2)),
+                    const SizedBox(height: 8),
+                    _buildComparisonStat('P&L', '\$${notifier.shortTotalPnL.toStringAsFixed(0)}',
+                        notifier.shortTotalPnL >= 0 ? AppColors.success : AppColors.danger),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDirectionBreakdown(BuildContext context, dynamic notifier) {
+    final longCount = notifier.longTradeCount;
+    final shortCount = notifier.shortTradeCount;
+    final total = longCount + shortCount;
+
+    if (total == 0) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32),
+          child: Text('No trades yet', style: TextStyle(color: AppColors.textTertiary)),
+        ),
+      );
+    }
+
+    final longPercent = (longCount / total) * 100;
+    final shortPercent = (shortCount / total) * 100;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Position Distribution', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        const SizedBox(height: 16),
+        GlassCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Long Trades'),
+                  Text('${longPercent.toStringAsFixed(1)}%',
+                      style: const TextStyle(color: AppColors.success, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: longPercent / 100,
+                backgroundColor: Colors.white10,
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.success),
+                borderRadius: BorderRadius.circular(10),
+                minHeight: 8,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Short Trades'),
+                  Text('${shortPercent.toStringAsFixed(1)}%',
+                      style: const TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(
+                value: shortPercent / 100,
+                backgroundColor: Colors.white10,
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.danger),
+                borderRadius: BorderRadius.circular(10),
+                minHeight: 8,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildComparisonStat(String label, String value, [Color? color]) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+        Text(value,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: color,
+            )),
+      ],
+    );
+  }
     return Column(
       children: [
         Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
@@ -91,30 +288,32 @@ class AnalyticsDashboard extends ConsumerWidget {
                 children: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((e) => Text(e, style: const TextStyle(color: AppColors.textTertiary))).toList(),
               ),
               const SizedBox(height: 12),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 7,
-                  mainAxisSpacing: 8,
-                  crossAxisSpacing: 8,
+              RepaintBoundary(
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    mainAxisSpacing: 8,
+                    crossAxisSpacing: 8,
+                  ),
+                  itemCount: 35,
+                  itemBuilder: (context, index) {
+                    // Simply mock some colors for now but based on index parity for visual interest
+                    Color color;
+                    if (index % 5 == 0) {
+                      color = AppColors.success.withValues(alpha: 0.8);
+                    } else if (index % 7 == 0) color = AppColors.danger.withValues(alpha: 0.6);
+                    else color = Colors.white.withValues(alpha: 0.05);
+                    
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    );
+                  },
                 ),
-                itemCount: 35,
-                itemBuilder: (context, index) {
-                  // Simply mock some colors for now but based on index parity for visual interest
-                  Color color;
-                  if (index % 5 == 0) {
-                    color = AppColors.success.withValues(alpha: 0.8);
-                  } else if (index % 7 == 0) color = AppColors.danger.withValues(alpha: 0.6);
-                  else color = Colors.white.withValues(alpha: 0.05);
-                  
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  );
-                },
               ),
             ],
           ),

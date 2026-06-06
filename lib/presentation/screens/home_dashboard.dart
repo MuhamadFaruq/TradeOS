@@ -153,8 +153,10 @@ class _HomeContent extends ConsumerWidget {
                 end: Alignment.bottomCenter,
               ),
             ),
-            child: CustomPaint(
-              painter: ChartPainter(isFlat: totalPnL == 0),
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: ChartPainter(isFlat: totalPnL == 0),
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -515,5 +517,5 @@ class ChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant ChartPainter oldDelegate) => isFlat != oldDelegate.isFlat;
 }
