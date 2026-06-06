@@ -63,7 +63,41 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
       actions: [
         IconButton(
           icon: const Icon(Icons.filter_list_rounded, color: AppColors.primary),
-          onPressed: () {},
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: AppColors.surface,
+              builder: (context) => Container(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Filter Options', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 20),
+                    const Text('Status', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      children: _filters.map((filter) {
+                        bool isSelected = _selectedFilter == filter;
+                        return ChoiceChip(
+                          label: Text(filter),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            if (selected) setState(() => _selectedFilter = filter);
+                            Navigator.pop(context);
+                          },
+                          backgroundColor: Colors.white.withValues(alpha: 0.05),
+                          selectedColor: AppColors.primary.withValues(alpha: 0.2),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ],
     );

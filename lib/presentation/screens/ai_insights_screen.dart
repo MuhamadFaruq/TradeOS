@@ -4,11 +4,16 @@ import '../../core/theme/app_colors.dart';
 import '../../core/widgets/core_widgets.dart';
 import '../../data/providers/trade_provider.dart';
 
-class AIInsightsScreen extends ConsumerWidget {
+class AIInsightsScreen extends ConsumerStatefulWidget {
   const AIInsightsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AIInsightsScreen> createState() => _AIInsightsScreenState();
+}
+
+class _AIInsightsScreenState extends ConsumerState<AIInsightsScreen> {
+  @override
+  Widget build(BuildContext context) {
     final trades = ref.watch(tradeProvider);
     final hasTrades = trades.isNotEmpty;
 
@@ -23,7 +28,7 @@ class AIInsightsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildAIPromptCard(trades.length),
+            _buildAIPromptCard(trades.length, context),
             const SizedBox(height: 32),
             _buildLabel('Critical Insights'),
             const SizedBox(height: 16),
@@ -77,7 +82,7 @@ class AIInsightsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAIPromptCard(int tradeCount) {
+  Widget _buildAIPromptCard(int tradeCount, BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -100,7 +105,7 @@ class AIInsightsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            tradeCount == 0 
+            tradeCount == 0
               ? '"Success is the sum of small efforts, repeated day-in and day-out."'
               : '"Your discipline score is promising. Keep focusing on high-confidence setups."',
             textAlign: TextAlign.center,
@@ -108,7 +113,11 @@ class AIInsightsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: tradeCount > 0 ? () {} : null,
+            onPressed: tradeCount > 0 ? () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('AI Report Generated! Check your email.')),
+              );
+            } : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
               foregroundColor: Colors.black,

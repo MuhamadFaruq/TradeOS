@@ -13,27 +13,34 @@ class StrategyLibraryScreen extends StatelessWidget {
         elevation: 0,
         title: const Text('Strategy Playbook', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
-          IconButton(icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primary), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primary),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Create new strategy coming soon...')),
+              );
+            },
+          ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          _buildStrategyCard(
+          _buildStrategyCard(context,
             'Bull Flag Breakout',
             'Trend following setup on H1/H4 timeframes.',
             '82%',
             '1:2.5',
           ),
           const SizedBox(height: 16),
-          _buildStrategyCard(
+          _buildStrategyCard(context,
             'Mean Reversion (VWAP)',
             'Shorting extended moves outside 2nd deviation.',
             '54%',
             '1:3.0',
           ),
           const SizedBox(height: 16),
-          _buildStrategyCard(
+          _buildStrategyCard(context,
             'Support Flip',
             'Buying retests of broken resistance levels.',
             '68%',
@@ -42,13 +49,13 @@ class StrategyLibraryScreen extends StatelessWidget {
           const SizedBox(height: 32),
           _buildLabel('Backtesting Session'),
           const SizedBox(height: 16),
-          _buildBacktestCTA(),
+          _buildBacktestCTA(context),
         ],
       ),
     );
   }
 
-  Widget _buildStrategyCard(String name, String desc, String winRate, String rr) {
+  Widget _buildStrategyCard(BuildContext context, String name, String desc, String winRate, String rr) {
     return GlassCard(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -71,7 +78,11 @@ class StrategyLibraryScreen extends StatelessWidget {
               _buildStat('Avg RR', rr, AppColors.primary),
               const Spacer(),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Viewing rules for: $name')),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white.withValues(alpha: 0.05),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -96,7 +107,7 @@ class StrategyLibraryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBacktestCTA() {
+  Widget _buildBacktestCTA(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -116,7 +127,11 @@ class StrategyLibraryScreen extends StatelessWidget {
             style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
           ),
           const SizedBox(height: 20),
-          GlowingButton(text: 'START SESSION', onPressed: () {}),
+          GlowingButton(text: 'START SESSION', onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Backtesting session started! (Demo)')),
+            );
+          }),
         ],
       ),
     );

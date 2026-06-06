@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/core_widgets.dart';
 
-class CommunityScreen extends StatelessWidget {
+class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
 
+  @override
+  State<CommunityScreen> createState() => _CommunityScreenState();
+}
+
+class _CommunityScreenState extends State<CommunityScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -28,7 +33,7 @@ class CommunityScreen extends StatelessWidget {
         body: TabBarView(
           children: [
             _buildJournalFeed(),
-            _buildMentorReview(),
+            _buildMentorReview(context),
             _buildLeaderboard(),
           ],
         ),
@@ -97,7 +102,7 @@ class CommunityScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMentorReview() {
+  Widget _buildMentorReview(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -115,7 +120,11 @@ class CommunityScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 32),
-          GlowingButton(text: 'FIND A MENTOR', onPressed: () {}),
+          GlowingButton(text: 'FIND A MENTOR', onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Mentor matching service coming soon!')),
+            );
+          }),
         ],
       ),
     );

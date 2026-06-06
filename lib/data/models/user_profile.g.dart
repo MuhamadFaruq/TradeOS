@@ -22,30 +22,45 @@ const UserProfileSchema = CollectionSchema(
       name: r'biometricsEnabled',
       type: IsarType.bool,
     ),
-    r'defaultCurrency': PropertySchema(
+    r'dailyProfitTarget': PropertySchema(
       id: 1,
+      name: r'dailyProfitTarget',
+      type: IsarType.double,
+    ),
+    r'defaultCurrency': PropertySchema(
+      id: 2,
       name: r'defaultCurrency',
       type: IsarType.string,
     ),
     r'defaultRiskPercent': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'defaultRiskPercent',
       type: IsarType.double,
     ),
     r'email': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'email',
       type: IsarType.string,
     ),
+    r'initialBalance': PropertySchema(
+      id: 5,
+      name: r'initialBalance',
+      type: IsarType.double,
+    ),
     r'name': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'name',
       type: IsarType.string,
     ),
     r'notificationsEnabled': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'notificationsEnabled',
       type: IsarType.bool,
+    ),
+    r'weeklyProfitTarget': PropertySchema(
+      id: 8,
+      name: r'weeklyProfitTarget',
+      type: IsarType.double,
     )
   },
   estimateSize: _userProfileEstimateSize,
@@ -81,11 +96,14 @@ void _userProfileSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeBool(offsets[0], object.biometricsEnabled);
-  writer.writeString(offsets[1], object.defaultCurrency);
-  writer.writeDouble(offsets[2], object.defaultRiskPercent);
-  writer.writeString(offsets[3], object.email);
-  writer.writeString(offsets[4], object.name);
-  writer.writeBool(offsets[5], object.notificationsEnabled);
+  writer.writeDouble(offsets[1], object.dailyProfitTarget);
+  writer.writeString(offsets[2], object.defaultCurrency);
+  writer.writeDouble(offsets[3], object.defaultRiskPercent);
+  writer.writeString(offsets[4], object.email);
+  writer.writeDouble(offsets[5], object.initialBalance);
+  writer.writeString(offsets[6], object.name);
+  writer.writeBool(offsets[7], object.notificationsEnabled);
+  writer.writeDouble(offsets[8], object.weeklyProfitTarget);
 }
 
 UserProfile _userProfileDeserialize(
@@ -96,12 +114,15 @@ UserProfile _userProfileDeserialize(
 ) {
   final object = UserProfile();
   object.biometricsEnabled = reader.readBool(offsets[0]);
-  object.defaultCurrency = reader.readString(offsets[1]);
-  object.defaultRiskPercent = reader.readDouble(offsets[2]);
-  object.email = reader.readString(offsets[3]);
+  object.dailyProfitTarget = reader.readDouble(offsets[1]);
+  object.defaultCurrency = reader.readString(offsets[2]);
+  object.defaultRiskPercent = reader.readDouble(offsets[3]);
+  object.email = reader.readString(offsets[4]);
   object.id = id;
-  object.name = reader.readString(offsets[4]);
-  object.notificationsEnabled = reader.readBool(offsets[5]);
+  object.initialBalance = reader.readDouble(offsets[5]);
+  object.name = reader.readString(offsets[6]);
+  object.notificationsEnabled = reader.readBool(offsets[7]);
+  object.weeklyProfitTarget = reader.readDouble(offsets[8]);
   return object;
 }
 
@@ -115,15 +136,21 @@ P _userProfileDeserializeProp<P>(
     case 0:
       return (reader.readBool(offset)) as P;
     case 1:
-      return (reader.readString(offset)) as P;
-    case 2:
       return (reader.readDouble(offset)) as P;
-    case 3:
+    case 2:
       return (reader.readString(offset)) as P;
+    case 3:
+      return (reader.readDouble(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
+      return (reader.readDouble(offset)) as P;
+    case 6:
+      return (reader.readString(offset)) as P;
+    case 7:
       return (reader.readBool(offset)) as P;
+    case 8:
+      return (reader.readDouble(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -228,6 +255,72 @@ extension UserProfileQueryFilter
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'biometricsEnabled',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      dailyProfitTargetEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'dailyProfitTarget',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      dailyProfitTargetGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'dailyProfitTarget',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      dailyProfitTargetLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'dailyProfitTarget',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      dailyProfitTargetBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'dailyProfitTarget',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
       ));
     });
   }
@@ -619,6 +712,72 @@ extension UserProfileQueryFilter
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      initialBalanceEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'initialBalance',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      initialBalanceGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'initialBalance',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      initialBalanceLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'initialBalance',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      initialBalanceBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'initialBalance',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition> nameEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -759,6 +918,72 @@ extension UserProfileQueryFilter
       ));
     });
   }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      weeklyProfitTargetEqualTo(
+    double value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'weeklyProfitTarget',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      weeklyProfitTargetGreaterThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'weeklyProfitTarget',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      weeklyProfitTargetLessThan(
+    double value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'weeklyProfitTarget',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterFilterCondition>
+      weeklyProfitTargetBetween(
+    double lower,
+    double upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'weeklyProfitTarget',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
 }
 
 extension UserProfileQueryObject
@@ -780,6 +1005,20 @@ extension UserProfileQuerySortBy
       sortByBiometricsEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'biometricsEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      sortByDailyProfitTarget() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dailyProfitTarget', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      sortByDailyProfitTargetDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dailyProfitTarget', Sort.desc);
     });
   }
 
@@ -822,6 +1061,19 @@ extension UserProfileQuerySortBy
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByInitialBalance() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'initialBalance', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      sortByInitialBalanceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'initialBalance', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -847,6 +1099,20 @@ extension UserProfileQuerySortBy
       return query.addSortBy(r'notificationsEnabled', Sort.desc);
     });
   }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      sortByWeeklyProfitTarget() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'weeklyProfitTarget', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      sortByWeeklyProfitTargetDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'weeklyProfitTarget', Sort.desc);
+    });
+  }
 }
 
 extension UserProfileQuerySortThenBy
@@ -862,6 +1128,20 @@ extension UserProfileQuerySortThenBy
       thenByBiometricsEnabledDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'biometricsEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      thenByDailyProfitTarget() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dailyProfitTarget', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      thenByDailyProfitTargetDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'dailyProfitTarget', Sort.desc);
     });
   }
 
@@ -916,6 +1196,19 @@ extension UserProfileQuerySortThenBy
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByInitialBalance() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'initialBalance', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      thenByInitialBalanceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'initialBalance', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -941,6 +1234,20 @@ extension UserProfileQuerySortThenBy
       return query.addSortBy(r'notificationsEnabled', Sort.desc);
     });
   }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      thenByWeeklyProfitTarget() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'weeklyProfitTarget', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QAfterSortBy>
+      thenByWeeklyProfitTargetDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'weeklyProfitTarget', Sort.desc);
+    });
+  }
 }
 
 extension UserProfileQueryWhereDistinct
@@ -949,6 +1256,13 @@ extension UserProfileQueryWhereDistinct
       distinctByBiometricsEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'biometricsEnabled');
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QDistinct>
+      distinctByDailyProfitTarget() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'dailyProfitTarget');
     });
   }
 
@@ -974,6 +1288,12 @@ extension UserProfileQueryWhereDistinct
     });
   }
 
+  QueryBuilder<UserProfile, UserProfile, QDistinct> distinctByInitialBalance() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'initialBalance');
+    });
+  }
+
   QueryBuilder<UserProfile, UserProfile, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -985,6 +1305,13 @@ extension UserProfileQueryWhereDistinct
       distinctByNotificationsEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'notificationsEnabled');
+    });
+  }
+
+  QueryBuilder<UserProfile, UserProfile, QDistinct>
+      distinctByWeeklyProfitTarget() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'weeklyProfitTarget');
     });
   }
 }
@@ -1001,6 +1328,13 @@ extension UserProfileQueryProperty
       biometricsEnabledProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'biometricsEnabled');
+    });
+  }
+
+  QueryBuilder<UserProfile, double, QQueryOperations>
+      dailyProfitTargetProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'dailyProfitTarget');
     });
   }
 
@@ -1024,6 +1358,12 @@ extension UserProfileQueryProperty
     });
   }
 
+  QueryBuilder<UserProfile, double, QQueryOperations> initialBalanceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'initialBalance');
+    });
+  }
+
   QueryBuilder<UserProfile, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
@@ -1034,6 +1374,13 @@ extension UserProfileQueryProperty
       notificationsEnabledProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'notificationsEnabled');
+    });
+  }
+
+  QueryBuilder<UserProfile, double, QQueryOperations>
+      weeklyProfitTargetProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'weeklyProfitTarget');
     });
   }
 }

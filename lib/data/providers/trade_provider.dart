@@ -32,19 +32,36 @@ class TradeNotifier extends StateNotifier<List<Trade>> {
   }
 
   // Statistics calculations
-  double get totalPnL => state.fold(0, (sum, item) => sum + item.pnl);
+  double get totalPnL {
+    if (state.isEmpty) return 0.0;
+    return state.fold(0.0, (sum, item) => sum + item.pnl);
+  }
   
   double get winRate {
-    if (state.isEmpty) return 0;
-    final wins = state.where((t) => t.status == TradeStatus.won).length;
-    return (wins / state.length) * 100;
+    // Only count closed trades (won or lost)
+    final closedTrades = state.where((t) => 
+      t.status == TradeStatus.won || t.status == TradeStatus.lost).toList();
+    
+    if (closedTrades.isEmpty) return 0.0;
+    
+    final wins = closedTrades.where((t) => t.status == TradeStatus.won).length;
+    return (wins / closedTrades.length) * 100;
   }
 
   double get profitFactor {
     final grossProfit = state.where((t) => t.pnl > 0).fold(0.0, (sum, t) => sum + t.pnl);
     final grossLoss = state.where((t) => t.pnl < 0).fold(0.0, (sum, t) => sum + t.pnl.abs());
-    if (grossLoss == 0) return grossProfit > 0 ? 99.0 : 0.0;
+    
+    if (grossLoss == 0) {
+      return grossProfit > 0 ? double.infinity : 0.0;
+    }
     return grossProfit / grossLoss;
+  }
+
+  // Account Growth Calculation
+  double calculateGrowth(double initialBalance) {
+    if (initialBalance <= 0) return 0.0;
+    return (totalPnL / initialBalance) * 100;
   }
 
   Future<void> clearAllTrades() async {

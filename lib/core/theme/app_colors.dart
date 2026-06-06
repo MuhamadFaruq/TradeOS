@@ -12,9 +12,9 @@ class AppColors {
   static const Color accent = Color(0xFF8A2BE2);
 
   // Feedback
-  static const Color success = Color(0xFF00FFA3);
-  static const Color danger = Color(0xFFFF3B3B);
-  static const Color warning = Color(0xFFFFB800);
+  static const Color success = Color(0xFF00E676); // Vibrant Green
+  static const Color danger = Color(0xFFFF5252);  // Vibrant Red
+  static const Color warning = Color(0xFFFFD740); // Vibrant Yellow
 
   // Text
   static const Color textPrimary = Colors.white;

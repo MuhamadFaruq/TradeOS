@@ -41,7 +41,7 @@ class GlassCard extends StatelessWidget {
 
 class GlowingButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final bool isSecondary;
 
   const GlowingButton({
@@ -57,11 +57,12 @@ class GlowingButton extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: (isSecondary ? AppColors.accent : AppColors.primary).withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
+          if (onPressed != null)
+            BoxShadow(
+              color: (isSecondary ? AppColors.accent : AppColors.primary).withValues(alpha: 0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
         ],
       ),
       child: ElevatedButton(
@@ -69,6 +70,7 @@ class GlowingButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: isSecondary ? AppColors.accent : AppColors.primary,
           foregroundColor: Colors.white,
+          disabledBackgroundColor: Colors.white.withValues(alpha: 0.1),
           minimumSize: const Size(double.infinity, 56),
         ),
         child: Text(text),

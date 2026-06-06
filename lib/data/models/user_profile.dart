@@ -12,4 +12,9 @@ class UserProfile {
   bool notificationsEnabled = true;
   String defaultCurrency = 'USD';
   double defaultRiskPercent = 1.0;
+  
+  // New metrics for growth calculation
+  double initialBalance = 10000.0;
+  double dailyProfitTarget = 100.0;
+  double weeklyProfitTarget = 500.0;
 }

@@ -3,7 +3,7 @@ import 'package:isar/isar.dart';
 part 'trade.g.dart';
 
 enum TradeDirection { long, short }
-enum TradeStatus { won, lost, open }
+enum TradeStatus { won, lost, breakEven, pending, open }
 
 @collection
 class Trade {
@@ -26,6 +26,7 @@ class Trade {
   @enumerated
   late TradeStatus status;
   
+  @Index()
   late DateTime date;
   String? strategy;
   String? notes;

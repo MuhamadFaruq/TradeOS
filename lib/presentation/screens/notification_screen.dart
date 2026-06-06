@@ -2,8 +2,32 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/core_widgets.dart';
 
-class NotificationScreen extends StatelessWidget {
+class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
+
+  @override
+  State<NotificationScreen> createState() => _NotificationScreenState();
+}
+
+class _NotificationScreenState extends State<NotificationScreen> {
+  final List<bool> _readStatus = List.filled(8, false);
+
+  void _markAllRead() {
+    setState(() {
+      for (int i = 0; i < _readStatus.length; i++) {
+        _readStatus[i] = true;
+      }
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('All notifications marked as read')),
+    );
+  }
+
+  void _deleteNotification(int index) {
+    setState(() {
+      _readStatus.removeAt(index);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,17 +37,24 @@ class NotificationScreen extends StatelessWidget {
         elevation: 0,
         title: const Text('Notifications', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
-          TextButton(onPressed: () {}, child: const Text('Mark all read')),
+          TextButton(
+            onPressed: _markAllRead,
+            child: const Text('Mark all read', style: TextStyle(color: AppColors.primary)),
+          ),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(20),
-        itemCount: 8,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          return _buildNotificationCard(index);
-        },
-      ),
+      body: _readStatus.isEmpty
+          ? const Center(
+              child: Text('No notifications', style: TextStyle(color: AppColors.textTertiary)),
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(20),
+              itemCount: _readStatus.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                return _buildNotificationCard(index);
+              },
+            ),
     );
   }
 
@@ -32,6 +63,7 @@ class NotificationScreen extends StatelessWidget {
     final type = types[index % 3];
     final icons = [Icons.trending_up_rounded, Icons.newspaper_rounded, Icons.auto_awesome_rounded];
     final colors = [AppColors.success, AppColors.primary, AppColors.accent];
+    final isRead = _readStatus[index];
 
     return GlassCard(
       padding: const EdgeInsets.all(16),
@@ -54,8 +86,15 @@ class NotificationScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(type, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    const Text('2h ago', style: TextStyle(color: AppColors.textTertiary, fontSize: 10)),
+                    Text(
+                      type,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: isRead ? AppColors.textTertiary : Colors.white,
+                      ),
+                    ),
+                    Text('2h ago', style: TextStyle(color: AppColors.textTertiary, fontSize: 10)),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -65,6 +104,10 @@ class NotificationScreen extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          GestureDetector(
+            onTap: () => _deleteNotification(index),
+            child: const Icon(Icons.close_rounded, color: AppColors.textTertiary, size: 18),
           ),
         ],
       ),

@@ -1,40 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/core_widgets.dart';
+import '../../data/providers/auth_provider.dart';
 import 'auth_screen.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _currentStep = 0;
-  
-  final List<OnboardingQuestion> _questions = [
-    OnboardingQuestion(
-      title: 'What do you trade?',
-      options: ['Forex', 'Crypto', 'Stocks', 'Futures'],
-      icon: Icons.currency_exchange_rounded,
-    ),
-    OnboardingQuestion(
-      title: 'Experience level?',
-      options: ['Beginner', 'Intermediate', 'Professional', 'Institutional'],
-      icon: Icons.trending_up_rounded,
-    ),
-    OnboardingQuestion(
-      title: 'Trading Style?',
-      options: ['Scalping', 'Day Trading', 'Swing Trading', 'Position'],
-      icon: Icons.timer_rounded,
-    ),
-    OnboardingQuestion(
-      title: 'Are you a Prop Firm trader?',
-      options: ['Yes, actively', 'Starting soon', 'No, personal capital'],
-      icon: Icons.account_balance_rounded,
-    ),
-  ];
+
+  late List<OnboardingQuestion> _questions;
+  final Map<int, String> _selectedAnswers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _questions = [
+      OnboardingQuestion(
+        title: 'What do you trade?',
+        options: ['Forex', 'Crypto', 'Stocks', 'Futures'],
+        icon: Icons.currency_exchange_rounded,
+      ),
+      OnboardingQuestion(
+        title: 'Experience level?',
+        options: ['Beginner', 'Intermediate', 'Professional', 'Institutional'],
+        icon: Icons.trending_up_rounded,
+      ),
+      OnboardingQuestion(
+        title: 'Trading Style?',
+        options: ['Scalping', 'Day Trading', 'Swing Trading', 'Position'],
+        icon: Icons.timer_rounded,
+      ),
+      OnboardingQuestion(
+        title: 'Are you a Prop Firm trader?',
+        options: ['Yes, actively', 'Starting soon', 'No, personal capital'],
+        icon: Icons.account_balance_rounded,
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +95,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   itemCount: question.options.length,
                   separatorBuilder: (context, index) => const SizedBox(height: 16),
                   itemBuilder: (context, index) {
-                    return _buildOptionCard(question.options[index]);
+                    bool isSelected = _selectedAnswers[_currentStep] == question.options[index];
+                    return _buildOptionCard(
+                      question.options[index],
+                      isSelected: isSelected,
+                      onTap: () => setState(() => _selectedAnswers[_currentStep] = question.options[index]),
+                    );
                   },
                 ),
               ),
@@ -107,16 +121,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     width: 150,
                     child: GlowingButton(
                       text: _currentStep == _questions.length - 1 ? 'FINISH' : 'NEXT',
-                      onPressed: () {
+                      onPressed: _selectedAnswers[_currentStep] != null ? () {
                         if (_currentStep < _questions.length - 1) {
                           setState(() => _currentStep++);
                         } else {
+                          // Save onboarding data
+                          ref.read(authProvider.notifier).saveOnboardingData(
+                            tradingType: _selectedAnswers[0] ?? 'Forex',
+                            experienceLevel: _selectedAnswers[1] ?? 'Beginner',
+                            tradingStyle: _selectedAnswers[2] ?? 'Scalping',
+                            isPropFirmTrader: _selectedAnswers[3] == 'Yes, actively',
+                          );
+
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (context) => const AuthScreen()),
                           );
                         }
-                      },
+                      } : null,
                     ),
                   ),
                 ],
@@ -128,15 +150,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Widget _buildOptionCard(String label) {
-    return GlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      child: Row(
-        children: [
-          Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          const Spacer(),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
-        ],
+  Widget _buildOptionCard(String label, {bool isSelected = false, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: GlassCard(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        child: Row(
+          children: [
+            Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Spacer(),
+            if (isSelected)
+              const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 24)
+            else
+              const Icon(Icons.chevron_right_rounded, color: AppColors.textTertiary),
+          ],
+        ),
       ),
     );
   }

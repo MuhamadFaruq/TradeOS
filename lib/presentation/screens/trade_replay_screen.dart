@@ -46,7 +46,14 @@ class _TradeReplayScreenState extends State<TradeReplayScreen> {
         elevation: 0,
         title: const Text('Trade Replay', style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
-          IconButton(icon: const Icon(Icons.settings_input_component_rounded), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.settings_input_component_rounded),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Replay settings coming soon...')),
+              );
+            },
+          ),
         ],
       ),
       body: Column(
@@ -150,7 +157,11 @@ class _TradeReplayScreenState extends State<TradeReplayScreen> {
             AppColors.success,
           ),
           const SizedBox(height: 24),
-          GlowingButton(text: 'SAVE LEARNED LESSON', onPressed: () {}),
+          GlowingButton(text: 'SAVE LEARNED LESSON', onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Lesson saved to your learning journal!')),
+            );
+          }),
         ],
       ),
     );

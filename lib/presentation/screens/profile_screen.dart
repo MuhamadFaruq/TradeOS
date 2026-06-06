@@ -64,7 +64,15 @@ class ProfileScreen extends ConsumerWidget {
             'App Preferences',
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AppPreferencesScreen())),
           ),
-          _buildActionItem(Icons.account_balance_wallet_outlined, 'Trading Accounts'),
+          _buildActionItem(
+            Icons.account_balance_wallet_outlined,
+            'Trading Accounts',
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Trading accounts configuration coming soon...')),
+              );
+            },
+          ),
           
           const SizedBox(height: 40),
           _buildLogoutButton(context),

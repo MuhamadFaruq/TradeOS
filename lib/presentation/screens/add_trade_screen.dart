@@ -38,19 +38,46 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
     super.dispose();
   }
 
+  String? _validationError;
+
   void _saveTrade() {
-    final entryPrice = double.tryParse(_entryPriceController.text) ?? 0.0;
-    final exitPrice = double.tryParse(_exitPriceController.text) ?? 0.0;
-    final amount = double.tryParse(_amountController.text) ?? 0.0;
+    // Reset error
+    setState(() => _validationError = null);
+
+    // Validation
+    if (_pairController.text.isEmpty) {
+      setState(() => _validationError = 'Please enter trading pair');
+      return;
+    }
+
+    final entryPrice = double.tryParse(_entryPriceController.text);
+    if (entryPrice == null || entryPrice <= 0) {
+      setState(() => _validationError = 'Please enter valid entry price');
+      return;
+    }
+
+    final exitPrice = double.tryParse(_exitPriceController.text);
+    if (exitPrice == null || exitPrice <= 0) {
+      setState(() => _validationError = 'Please enter valid exit price');
+      return;
+    }
+
+    final amount = double.tryParse(_amountController.text);
+    if (amount == null || amount <= 0) {
+      setState(() => _validationError = 'Please enter valid amount');
+      return;
+    }
+
+    if (_strategyController.text.isEmpty) {
+      setState(() => _validationError = 'Please select a strategy');
+      return;
+    }
+
+    // PnL calculation
     final leverage = double.tryParse(_leverageController.text) ?? 1.0;
-    
-    // PnL calculation for Futures: ((Exit - Entry) / Entry) * Margin * Leverage
-    final pnl = entryPrice != 0 
-      ? ((exitPrice - entryPrice) / entryPrice) * amount * leverage * (_direction == 'LONG' ? 1 : -1)
-      : 0.0;
-    
-    final pnlPercentage = amount != 0 ? (pnl / amount) * 100 : 0.0;
-    
+    final pnl = ((exitPrice - entryPrice) / entryPrice) * amount * leverage * (_direction == 'LONG' ? 1 : -1);
+    final pnlPercentage = (pnl / amount) * 100;
+
     final trade = Trade.create(
       pair: _pairController.text,
       direction: _direction == 'LONG' ? TradeDirection.long : TradeDirection.short,
@@ -67,12 +94,23 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
       session: _session,
       confidence: _confidence.toInt(),
     );
-    
+
     trade.leverage = leverage;
     trade.isLong = _direction == 'LONG';
 
     ref.read(tradeProvider.notifier).addTrade(trade);
-    Navigator.pop(context);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Trade logged! P&L: ${pnl >= 0 ? '+' : ''}${pnl.toStringAsFixed(2)}'),
+        backgroundColor: pnl >= 0 ? AppColors.success : AppColors.danger,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) Navigator.pop(context);
+    });
   }
   
   @override
@@ -89,6 +127,19 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Error Message
+            if (_validationError != null)
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: AppColors.danger.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
+                ),
+                child: Text(_validationError!, style: const TextStyle(color: AppColors.danger, fontSize: 12)),
+              ),
+
             // Direction Toggle
             Row(
               children: [
@@ -112,17 +163,17 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
             _buildLabel('Entry Details'),
             Row(
               children: [
-                Expanded(child: _buildInputField('Entry Price', controller: _entryPriceController)),
+                Expanded(child: _buildInputField('Entry Price', controller: _entryPriceController, inputType: TextInputType.number)),
                 const SizedBox(width: 12),
-                Expanded(child: _buildInputField('Exit Price', controller: _exitPriceController)),
+                Expanded(child: _buildInputField('Exit Price', controller: _exitPriceController, inputType: TextInputType.number)),
               ],
             ),
             const SizedBox(height: 16),
             Row(
               children: [
-                Expanded(child: _buildInputField('Margin Amount (\$)', controller: _amountController)),
+                Expanded(child: _buildInputField('Margin Amount (\$)', controller: _amountController, inputType: TextInputType.number)),
                 const SizedBox(width: 12),
-                Expanded(child: _buildInputField('Leverage (x)', controller: _leverageController)),
+                Expanded(child: _buildInputField('Leverage (x)', controller: _leverageController, inputType: TextInputType.number)),
               ],
             ),
             
@@ -232,12 +283,12 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
     );
   }
 
-  Widget _buildInputField(String hint, {TextEditingController? controller}) {
+  Widget _buildInputField(String hint, {TextEditingController? controller, TextInputType inputType = TextInputType.text}) {
     return GlassCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: TextField(
         controller: controller,
-        keyboardType: TextInputType.text,
+        keyboardType: inputType,
         decoration: InputDecoration(hintText: hint, border: InputBorder.none, hintStyle: const TextStyle(fontSize: 12)),
       ),
     );

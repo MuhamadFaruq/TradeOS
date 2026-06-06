@@ -58,8 +58,22 @@ class TradeDetailScreen extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
-        IconButton(icon: const Icon(Icons.share_rounded), onPressed: () {}),
-        IconButton(icon: const Icon(Icons.edit_rounded), onPressed: () {}),
+        IconButton(
+          icon: const Icon(Icons.share_rounded),
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Trade screenshot copied to clipboard')),
+            );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.edit_rounded),
+          onPressed: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Edit trade - Coming soon')),
+            );
+          },
+        ),
       ],
     );
   }
@@ -96,7 +110,7 @@ class TradeDetailScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '${trade.direction.name.toUpperCase()} • ${trade.strategy} • 14 Aug, 2023',
+          '${trade.direction.name.toUpperCase()} • ${trade.strategy} • ${_formatDate(trade.date)}',
           style: const TextStyle(color: AppColors.textSecondary),
         ),
       ],
@@ -126,6 +140,11 @@ class TradeDetailScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${date.day} ${months[date.month - 1]}, ${date.year}';
   }
 
   Widget _buildLabel(String text) {

@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/widgets/core_widgets.dart';
 import '../../data/models/trade.dart';
 import '../../data/providers/trade_provider.dart';
+import '../../data/providers/profile_provider.dart';
 import 'analytics_dashboard.dart';
 import 'journal_list_screen.dart';
 import 'add_trade_screen.dart';
@@ -27,6 +28,9 @@ class _HomeContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final trades = ref.watch(tradeProvider);
     final notifier = ref.read(tradeProvider.notifier);
+    final profile = ref.watch(profileProvider);
+    
+    final initialBalance = profile?.initialBalance ?? 10000.0;
     
     return CustomScrollView(
       slivers: [
@@ -37,7 +41,7 @@ class _HomeContent extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildPortfolioCard(context, notifier.totalPnL, trades.isNotEmpty),
+                _buildPortfolioCard(context, notifier.totalPnL, trades.isNotEmpty, initialBalance),
                 const SizedBox(height: 30),
                 _buildActionGrid(context),
                 const SizedBox(height: 30),
@@ -46,7 +50,7 @@ class _HomeContent extends ConsumerWidget {
                 _buildStatsRow(context, notifier.winRate, notifier.profitFactor),
                 const SizedBox(height: 30),
                 _buildSectionHeader(context, 'Recent Trades', () {
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => const JournalListScreen()));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const JournalListScreen()));
                 }),
                 const SizedBox(height: 16),
                 _buildTradesList(context, trades),
@@ -104,9 +108,9 @@ class _HomeContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildPortfolioCard(BuildContext context, double totalPnL, bool hasTrades) {
-    // If no trades, everything should be zero to satisfy "empty" requirement
-    final double currentBalance = hasTrades ? (10000.00 + totalPnL) : 0.00;
+  Widget _buildPortfolioCard(BuildContext context, double totalPnL, bool hasTrades, double initialBalance) {
+    final double currentBalance = initialBalance + totalPnL;
+    final double growth = (totalPnL / initialBalance) * 100;
 
     return GlassCard(
       padding: const EdgeInsets.all(24),
@@ -125,7 +129,7 @@ class _HomeContent extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    totalPnL >= 0 ? '+\$${totalPnL.toStringAsFixed(2)}' : '-\$${totalPnL.abs().toStringAsFixed(2)}',
+                    '${totalPnL >= 0 ? '+' : ''}${growth.toStringAsFixed(2)}%',
                     style: TextStyle(
                       color: totalPnL >= 0 ? AppColors.success : AppColors.danger,
                       fontWeight: FontWeight.bold,
@@ -175,6 +179,7 @@ class _HomeContent extends ConsumerWidget {
   Widget _buildStatsRow(BuildContext context, double winRate, double profitFactor) {
     // Simulated drawdown for now, or could be calculated
     final double drawdown = winRate > 0 ? 1.5 : 0.0;
+    final String pfDisplay = profitFactor.isInfinite ? '∞' : profitFactor.toStringAsFixed(2);
 
     return Row(
       children: [
@@ -183,7 +188,7 @@ class _HomeContent extends ConsumerWidget {
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: _buildStatItem(context, 'Profit Factor', profitFactor.toStringAsFixed(2), AppColors.primary),
+          child: _buildStatItem(context, 'Profit Factor', pfDisplay, AppColors.primary),
         ),
         const SizedBox(width: 16),
         Expanded(
@@ -360,7 +365,11 @@ class _HomeContent extends ConsumerWidget {
         _ActionItem(
           icon: Icons.mic_rounded,
           label: 'Voice',
-          onTap: () {},
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Voice trade logging coming soon...'), backgroundColor: AppColors.primary),
+            );
+          },
         ),
       ],
     );

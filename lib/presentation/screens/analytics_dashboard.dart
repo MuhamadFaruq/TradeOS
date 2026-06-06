@@ -58,7 +58,7 @@ class AnalyticsDashboard extends ConsumerWidget {
             children: [
               _buildSimpleStat('Total Trades', count.toString()),
               _buildSimpleStat('Win Rate', '${winRate.toStringAsFixed(1)}%'),
-              _buildSimpleStat('Profit Factor', pf.toStringAsFixed(2)),
+              _buildSimpleStat('Profit Factor', pf.isInfinite ? '∞' : pf.toStringAsFixed(2)),
             ],
           ),
         ],
