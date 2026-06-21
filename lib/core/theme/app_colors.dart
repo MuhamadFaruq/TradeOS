@@ -1,41 +1,41 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Backgrounds
-  static const Color background = Color(0xFF050505);
-  static const Color cardBackground = Color(0xFF121212);
-  static const Color surface = Color(0xFF1A1A1A);
+  // Backgrounds - Using a deeper, more professional Slate/Navy palette
+  static const Color background = Color(0xFF020617); // Deepest Navy
+  static const Color cardBackground = Color(0xFF0F172A); // Slate 900
+  static const Color surface = Color(0xFF1E293B); // Slate 800
 
-  // Primaries
-  static const Color primary = Color(0xFF00D2FF);
-  static const Color primaryVariant = Color(0xFF00FFF0);
-  static const Color accent = Color(0xFF8A2BE2);
+  // Primaries - Refined Emerald/Teal for a FinTech look
+  static const Color primary = Color(0xFF10B981); // Emerald 500
+  static const Color primaryVariant = Color(0xFF059669); // Emerald 600
+  static const Color accent = Color(0xFF6366F1); // Indigo 500 (Sophisticated contrast)
 
-  // Feedback
-  static const Color success = Color(0xFF00E676); // Vibrant Green
-  static const Color danger = Color(0xFFFF5252);  // Vibrant Red
-  static const Color warning = Color(0xFFFFD740); // Vibrant Yellow
+  // Feedback - More balanced colors
+  static const Color success = Color(0xFF34D399); // Soft Emerald
+  static const Color danger = Color(0xFFFB7185);  // Rose 400 (More modern than pure red)
+  static const Color warning = Color(0xFFFBBF24); // Amber 400
 
-  // Text
-  static const Color textPrimary = Colors.white;
-  static const Color textSecondary = Color(0xFFA0A0A0);
-  static const Color textTertiary = Color(0xFF606060);
+  // Text - High contrast for readability
+  static const Color textPrimary = Color(0xFFF8FAFC); // Slate 50
+  static const Color textSecondary = Color(0xFF94A3B8); // Slate 400
+  static const Color textTertiary = Color(0xFF64748B); // Slate 500
 
-  // Gradients
+  // Gradients - More subtle, less "Neon"
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [primary, primaryVariant],
+    colors: [primary, Color(0xFF0EA5E9)], // Emerald to Sky Blue
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient accentGradient = LinearGradient(
-    colors: [accent, Color(0xFFC77DFF)],
+    colors: [accent, Color(0xFF8B5CF6)], // Indigo to Violet
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient glassGradient = LinearGradient(
-    colors: [Colors.white10, Colors.transparent],
+    colors: [Color(0x0DFFFFFF), Colors.transparent], // 5% White to Transparent
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

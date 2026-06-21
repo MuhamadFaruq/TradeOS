@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/core_widgets.dart';
 import '../../data/providers/trade_provider.dart';
+import '../../data/models/trade.dart';
 
 class AnalyticsDashboard extends ConsumerWidget {
   const AnalyticsDashboard({super.key});
@@ -11,6 +12,17 @@ class AnalyticsDashboard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final trades = ref.watch(tradeProvider);
     final notifier = ref.read(tradeProvider.notifier);
+
+    // Calculate real equity and disciplined equity curve data points
+    final sortedTrades = List<Trade>.from(trades)..sort((a, b) => a.date.compareTo(b.date));
+    
+    final List<double> realEquity = [0.0];
+    final List<double> discEquity = [0.0];
+    
+    for (var trade in sortedTrades) {
+      realEquity.add(realEquity.last + trade.pnl);
+      discEquity.add(discEquity.last + (trade.wasRuleBroken ? 0.0 : trade.pnl));
+    }
 
     return Scaffold(
       body: DefaultTabController(
@@ -35,36 +47,47 @@ class AnalyticsDashboard extends ConsumerWidget {
               padding: const EdgeInsets.all(20),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  TabBarView(
-                    children: [
-                      // Tab 1: Overall Stats
-                      SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            _buildEquitySection(context, trades.length, notifier.winRate,
-                                notifier.profitFactor),
-                            const SizedBox(height: 30),
-                            _buildPnLHeatmap(context, trades),
-                            const SizedBox(height: 30),
-                            _buildSessionAnalytics(context),
-                            const SizedBox(height: 30),
-                            _buildSetupBreakdown(context, trades),
-                            const SizedBox(height: 100),
-                          ],
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height - 200,
+                    child: TabBarView(
+                      children: [
+                        // Tab 1: Overall Stats
+                        SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              _buildEquitySection(
+                                context, 
+                                trades.length, 
+                                notifier.winRate, 
+                                notifier.profitFactor,
+                                notifier.disciplineRate,
+                                notifier.mistakeCosts,
+                                realEquity,
+                                discEquity,
+                              ),
+                              const SizedBox(height: 30),
+                              _buildPnLHeatmap(context, trades),
+                              const SizedBox(height: 30),
+                              _buildSessionAnalytics(context),
+                              const SizedBox(height: 30),
+                              _buildSetupBreakdown(context, trades),
+                              const SizedBox(height: 100),
+                            ],
+                          ),
                         ),
-                      ),
-                      // Tab 2: Long vs Short Comparison
-                      SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            _buildLongVsShortComparison(context, notifier),
-                            const SizedBox(height: 30),
-                            _buildDirectionBreakdown(context, notifier),
-                            const SizedBox(height: 100),
-                          ],
+                        // Tab 2: Long vs Short Comparison
+                        SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              _buildLongVsShortComparison(context, notifier),
+                              const SizedBox(height: 30),
+                              _buildDirectionBreakdown(context, notifier),
+                              const SizedBox(height: 100),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ]),
               ),
@@ -75,18 +98,57 @@ class AnalyticsDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildEquitySection(BuildContext context, int count, double winRate, double pf) {
+  Widget _buildEquitySection(
+    BuildContext context, 
+    int count, 
+    double winRate, 
+    double pf, 
+    double disciplineRate, 
+    double mistakeCosts,
+    List<double> realEquity,
+    List<double> discEquity,
+  ) {
     return GlassCard(
+      enableBlur: false,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Equity Curve', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Equity Curve', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 3,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  const Text('Real', style: TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+                  const SizedBox(width: 12),
+                  Container(
+                    width: 12,
+                    height: 3,
+                    color: AppColors.success,
+                  ),
+                  const SizedBox(width: 4),
+                  const Text('Disciplined', style: TextStyle(fontSize: 10, color: AppColors.textTertiary)),
+                ],
+              ),
+            ],
+          ),
           const SizedBox(height: 20),
           SizedBox(
             height: 200,
             width: double.infinity,
             child: RepaintBoundary(
-              child: CustomPaint(painter: DetailedChartPainter()),
+              child: CustomPaint(
+                painter: DetailedChartPainter(
+                  realEquity: realEquity,
+                  discEquity: discEquity,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -96,6 +158,25 @@ class AnalyticsDashboard extends ConsumerWidget {
               _buildSimpleStat('Total Trades', count.toString()),
               _buildSimpleStat('Win Rate', '${winRate.toStringAsFixed(1)}%'),
               _buildSimpleStat('Profit Factor', pf.isInfinite ? '∞' : pf.toStringAsFixed(2)),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Divider(color: Colors.white10),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildSimpleStat(
+                'Discipline Rate', 
+                '${disciplineRate.toStringAsFixed(1)}%', 
+                disciplineRate >= 70 ? AppColors.success : AppColors.warning,
+              ),
+              _buildSimpleStat(
+                'Mistake Costs', 
+                '-\$${mistakeCosts.toStringAsFixed(2)}', 
+                mistakeCosts > 0 ? AppColors.danger : AppColors.success,
+              ),
             ],
           ),
         ],
@@ -113,6 +194,7 @@ class AnalyticsDashboard extends ConsumerWidget {
           children: [
             Expanded(
               child: GlassCard(
+                enableBlur: false,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,6 +229,7 @@ class AnalyticsDashboard extends ConsumerWidget {
             const SizedBox(width: 16),
             Expanded(
               child: GlassCard(
+                enableBlur: false,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,6 +290,7 @@ class AnalyticsDashboard extends ConsumerWidget {
         const Text('Position Distribution', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         const SizedBox(height: 16),
         GlassCard(
+          enableBlur: false,
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
@@ -264,11 +348,20 @@ class AnalyticsDashboard extends ConsumerWidget {
       ],
     );
   }
+
+  Widget _buildSimpleStat(String label, String value, [Color? color]) {
     return Column(
       children: [
         Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(
+          value, 
+          style: TextStyle(
+            fontWeight: FontWeight.bold, 
+            fontSize: 16,
+            color: color ?? Colors.white,
+          ),
+        ),
       ],
     );
   }
@@ -280,6 +373,7 @@ class AnalyticsDashboard extends ConsumerWidget {
         const Text('PnL Heatmap', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         const SizedBox(height: 16),
         GlassCard(
+          enableBlur: false,
           padding: const EdgeInsets.all(12),
           child: Column(
             children: [
@@ -339,6 +433,7 @@ class AnalyticsDashboard extends ConsumerWidget {
 
   Widget _buildSessionRow(String name, double performance) {
     return GlassCard(
+      enableBlur: false,
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -400,6 +495,7 @@ class AnalyticsDashboard extends ConsumerWidget {
       width: 140,
       margin: const EdgeInsets.only(right: 16),
       child: GlassCard(
+        enableBlur: false,
         padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -415,43 +511,102 @@ class AnalyticsDashboard extends ConsumerWidget {
 }
 
 class DetailedChartPainter extends CustomPainter {
+  final List<double> realEquity;
+  final List<double> discEquity;
+
+  DetailedChartPainter({required this.realEquity, required this.discEquity});
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
+    if (realEquity.isEmpty) return;
+
+    double maxVal = realEquity.first;
+    double minVal = realEquity.first;
+    
+    for (var val in realEquity) {
+      if (val > maxVal) maxVal = val;
+      if (val < minVal) minVal = val;
+    }
+    for (var val in discEquity) {
+      if (val > maxVal) maxVal = val;
+      if (val < minVal) minVal = val;
+    }
+
+    double range = maxVal - minVal;
+    if (range == 0) range = 10.0;
+    
+    final double padMax = maxVal + range * 0.15;
+    final double padMin = minVal - range * 0.15;
+
+    double priceToY(double val) {
+      return size.height - 20 - ((val - padMin) / (padMax - padMin)) * (size.height - 40);
+    }
+
+    double indexToX(int idx, int total) {
+      if (total <= 1) return size.width / 2;
+      return (size.width - 20) * (idx / (total - 1)) + 10;
+    }
+
+    // 1. Draw Real Equity curve (Solid line)
+    final realPaint = Paint()
       ..color = AppColors.primary
-      ..strokeWidth = 2
+      ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke;
 
+    final realPath = Path();
+    realPath.moveTo(indexToX(0, realEquity.length), priceToY(realEquity.first));
+    for (int i = 1; i < realEquity.length; i++) {
+      realPath.lineTo(indexToX(i, realEquity.length), priceToY(realEquity[i]));
+    }
+    canvas.drawPath(realPath, realPaint);
+
+    // Draw Fill under Real Equity
     final fillPaint = Paint()
       ..shader = LinearGradient(
-        colors: [AppColors.primary.withValues(alpha: 0.3), Colors.transparent],
+        colors: [AppColors.primary.withValues(alpha: 0.15), Colors.transparent],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    final path = Path();
-    path.moveTo(0, size.height * 0.9);
-    path.lineTo(size.width * 0.1, size.height * 0.85);
-    path.lineTo(size.width * 0.2, size.height * 0.95);
-    path.lineTo(size.width * 0.3, size.height * 0.7);
-    path.lineTo(size.width * 0.4, size.height * 0.75);
-    path.lineTo(size.width * 0.5, size.height * 0.5);
-    path.lineTo(size.width * 0.6, size.height * 0.55);
-    path.lineTo(size.width * 0.7, size.height * 0.3);
-    path.lineTo(size.width * 0.8, size.height * 0.4);
-    path.lineTo(size.width * 0.9, size.height * 0.1);
-    path.lineTo(size.width, size.height * 0.15);
-
-    canvas.drawPath(path, paint);
-
-    final fillPath = Path.from(path);
-    fillPath.lineTo(size.width, size.height);
-    fillPath.lineTo(0, size.height);
+    
+    final fillPath = Path.from(realPath);
+    fillPath.lineTo(indexToX(realEquity.length - 1, realEquity.length), size.height);
+    fillPath.lineTo(indexToX(0, realEquity.length), size.height);
     fillPath.close();
-
     canvas.drawPath(fillPath, fillPaint);
+
+    // 2. Draw Disciplined Equity curve (Dashed line in green)
+    final discColor = AppColors.success;
+    final discPaint = Paint()
+      ..color = discColor.withValues(alpha: 0.8)
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+
+    final discPath = Path();
+    discPath.moveTo(indexToX(0, discEquity.length), priceToY(discEquity.first));
+    for (int i = 1; i < discEquity.length; i++) {
+      discPath.lineTo(indexToX(i, discEquity.length), priceToY(discEquity[i]));
+    }
+    
+    _drawDashedPath(canvas, discPath, discPaint);
+  }
+
+  void _drawDashedPath(Canvas canvas, Path path, Paint paint) {
+    final metrics = path.computeMetrics();
+    for (final metric in metrics) {
+      double distance = 0.0;
+      const double dashLength = 5.0;
+      const double gapLength = 3.0;
+      while (distance < metric.length) {
+        final double end = (distance + dashLength).clamp(0.0, metric.length);
+        final Path extract = metric.extractPath(distance, end);
+        canvas.drawPath(extract, paint);
+        distance += dashLength + gapLength;
+      }
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant DetailedChartPainter oldDelegate) {
+    return oldDelegate.realEquity != realEquity || oldDelegate.discEquity != discEquity;
+  }
 }

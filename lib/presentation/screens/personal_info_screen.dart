@@ -24,9 +24,9 @@ class _PersonalInfoScreenState extends ConsumerState<PersonalInfoScreen> {
     final profile = ref.read(profileProvider);
     _nameController = TextEditingController(text: profile?.name ?? '');
     _emailController = TextEditingController(text: profile?.email ?? '');
-    _balanceController = TextEditingController(text: profile?.initialBalance.toString() ?? '10000.0');
-    _dailyTargetController = TextEditingController(text: profile?.dailyProfitTarget.toString() ?? '100.0');
-    _weeklyTargetController = TextEditingController(text: profile?.weeklyProfitTarget.toString() ?? '500.0');
+    _balanceController = TextEditingController(text: profile?.initialBalance.toString() ?? '0.0');
+    _dailyTargetController = TextEditingController(text: profile?.dailyProfitTarget.toString() ?? '0.0');
+    _weeklyTargetController = TextEditingController(text: profile?.weeklyProfitTarget.toString() ?? '0.0');
   }
 
   @override

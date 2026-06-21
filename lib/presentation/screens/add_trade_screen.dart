@@ -17,6 +17,17 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
   final String _session = 'LONDON';
   final String _emotion = 'CALM';
   double _confidence = 5.0;
+  String _brokenRule = 'None / Stuck to Plan';
+  
+  final List<String> _mistakeOptions = [
+    'None / Stuck to Plan',
+    'FOMO (Fear of Missing Out)',
+    'Revenge Trading',
+    'Early Exit',
+    'Overleveraged',
+    'Ignoring SL/TP',
+    'Overtrading',
+  ];
   
   final _pairController = TextEditingController(text: 'BTC/USDT');
   final _strategyController = TextEditingController(text: 'Bull Flag');
@@ -31,6 +42,8 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
   final _durationMinutesController = TextEditingController();
   final _stopLossController = TextEditingController();
   final _takeProfitController = TextEditingController();
+  final _commissionController = TextEditingController();
+  final _swapController = TextEditingController();
 
   // Screenshot tracking
   final List<String> _beforeEntryScreenshots = [];
@@ -51,6 +64,8 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
     _durationMinutesController.dispose();
     _stopLossController.dispose();
     _takeProfitController.dispose();
+    _commissionController.dispose();
+    _swapController.dispose();
     super.dispose();
   }
 
@@ -81,12 +96,20 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
     TradeStatus status = TradeStatus.open;
     double pnl = 0.0;
     double pnlPercentage = 0.0;
+    double commission = 0.0;
+    double swap = 0.0;
 
     if (exitPrice != null && exitPrice > 0) {
-      pnl = ((exitPrice - entryPrice) / entryPrice) * amount * leverage * (_direction == 'LONG' ? 1 : -1);
+      final grossPnl = ((exitPrice - entryPrice) / entryPrice) * amount * leverage * (_direction == 'LONG' ? 1 : -1);
+      commission = double.tryParse(_commissionController.text) ?? 0.0;
+      swap = double.tryParse(_swapController.text) ?? 0.0;
+      pnl = grossPnl - commission + swap;
       pnlPercentage = amount > 0 ? (pnl / amount) * 100 : 0.0;
       status = pnl >= 0 ? TradeStatus.won : TradeStatus.lost;
     }
+
+    final wasRuleBroken = _brokenRule != 'None / Stuck to Plan';
+    final brokenRule = wasRuleBroken ? _brokenRule : null;
 
     final trade = Trade.create(
       pair: _pairController.text,
@@ -103,6 +126,10 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
       emotion: _emotion,
       session: _session,
       confidence: _confidence.toInt(),
+      wasRuleBroken: wasRuleBroken,
+      brokenRule: brokenRule,
+      commission: commission,
+      swap: swap,
     );
 
     trade.leverage = leverage;
@@ -211,12 +238,20 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
             const SizedBox(height: 24),
             _buildLabel('Risk Management'),
             Row(
-              children: [
-                Expanded(child: _buildInputField('Stop Loss', controller: _stopLossController, inputType: TextInputType.number)),
-                const SizedBox(width: 12),
-                Expanded(child: _buildInputField('Take Profit', controller: _takeProfitController, inputType: TextInputType.number)),
-              ],
-            ),
+               children: [
+                 Expanded(child: _buildInputField('Stop Loss', controller: _stopLossController, inputType: TextInputType.number)),
+                 const SizedBox(width: 12),
+                 Expanded(child: _buildInputField('Take Profit', controller: _takeProfitController, inputType: TextInputType.number)),
+               ],
+             ),
+             const SizedBox(height: 16),
+             Row(
+               children: [
+                 Expanded(child: _buildInputField('Commission (\$)', controller: _commissionController, inputType: TextInputType.number)),
+                 const SizedBox(width: 12),
+                 Expanded(child: _buildInputField('Swap (\$)', controller: _swapController, inputType: TextInputType.number)),
+               ],
+             ),
 
             const SizedBox(height: 24),
             _buildLabel('Order Flow Metrics (Optional)'),
@@ -250,7 +285,10 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
             
             const SizedBox(height: 32),
             _buildLabel('Mistakes (If any)'),
-            _buildSelectorField('None / Stuck to Plan', Icons.report_problem_rounded),
+            GestureDetector(
+              onTap: _showMistakesSheet,
+              child: _buildSelectorField(_brokenRule, Icons.report_problem_rounded),
+            ),
             
             const SizedBox(height: 32),
             _buildLabel('Screenshots (Before & After)'),
@@ -307,6 +345,52 @@ class _AddTradeScreenState extends ConsumerState<AddTradeScreen> {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(text.toUpperCase(), style: Theme.of(context).textTheme.labelSmall?.copyWith(letterSpacing: 1.2)),
+    );
+  }
+
+  void _showMistakesSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Select Mistake / Rule Broken', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            ..._mistakeOptions.map((option) {
+              final isSelected = _brokenRule == option;
+              return ListTile(
+                leading: Icon(
+                  option == 'None / Stuck to Plan' ? Icons.check_circle_rounded : Icons.report_problem_rounded,
+                  color: isSelected
+                      ? AppColors.primary
+                      : (option == 'None / Stuck to Plan' ? AppColors.success : AppColors.danger),
+                  size: 20,
+                ),
+                title: Text(
+                  option,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
+                  ),
+                ),
+                trailing: isSelected ? const Icon(Icons.check_rounded, color: AppColors.primary) : null,
+                onTap: () {
+                  setState(() => _brokenRule = option);
+                  Navigator.pop(context);
+                },
+              );
+            }),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
     );
   }
 

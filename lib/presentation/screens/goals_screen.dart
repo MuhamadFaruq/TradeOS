@@ -84,14 +84,22 @@ class GoalsScreen extends ConsumerWidget {
   Widget _buildGoalItem(String title, int current, int target, IconData icon) {
     double progress = (current / target).clamp(0.0, 1.0);
     return GlassCard(
+      enableBlur: false,
       child: Column(
         children: [
           Row(
             children: [
               Icon(icon, color: AppColors.primary, size: 20),
               const SizedBox(width: 12),
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-              const Spacer(),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
               Text('$current/$target', style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
             ],
           ),

@@ -18,12 +18,16 @@ class _EconomicCalendarScreenState extends ConsumerState<EconomicCalendarScreen>
   late Timer _timer;
   bool _onlyHighImpact = false;
   DateTime _selectedDate = DateTime.now();
+  DateTime? _lastAutoRefresh;
 
   @override
   void initState() {
     super.initState();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+        _checkAndAutoRefreshNews();
+      }
     });
   }
 
@@ -33,9 +37,38 @@ class _EconomicCalendarScreenState extends ConsumerState<EconomicCalendarScreen>
     super.dispose();
   }
 
+  void _checkAndAutoRefreshNews() {
+    final calendarState = ref.read(economicCalendarProvider);
+    final events = calendarState.asData?.value;
+    if (events == null || events.isEmpty) return;
+
+    final now = DateTime.now();
+    bool needsRefresh = false;
+
+    for (var event in events) {
+      if (event.actual == null || event.actual!.isEmpty) {
+        final diff = event.date.difference(now);
+        // Event releases in next 30 seconds or has released up to 2 minutes ago
+        if (diff.inSeconds >= -120 && diff.inSeconds <= 30) {
+          needsRefresh = true;
+          break;
+        }
+      }
+    }
+
+    if (needsRefresh) {
+      // Throttle auto-refresh to at most once every 10 seconds
+      if (_lastAutoRefresh == null || now.difference(_lastAutoRefresh!) > const Duration(seconds: 10)) {
+        _lastAutoRefresh = now;
+        ref.read(economicCalendarRefreshProvider)();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final calendarState = ref.watch(economicCalendarProvider);
+    final isRefreshing = ref.watch(calendarRefreshingProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -60,14 +93,20 @@ class _EconomicCalendarScreenState extends ConsumerState<EconomicCalendarScreen>
             onPressed: () => setState(() => _onlyHighImpact = !_onlyHighImpact),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: () => ref.read(economicCalendarRefreshProvider)(),
+            icon: isRefreshing
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+                  )
+                : const Icon(Icons.refresh_rounded),
+            onPressed: isRefreshing ? null : () => ref.read(economicCalendarRefreshProvider)(),
           ),
         ],
       ),
       body: Column(
         children: [
-          _buildDaySelector(),
+          _buildDaySelector(calendarState.asData?.value ?? []),
           Expanded(
             child: calendarState.when(
               data: (events) {
@@ -112,41 +151,137 @@ class _EconomicCalendarScreenState extends ConsumerState<EconomicCalendarScreen>
     );
   }
 
-  Widget _buildDaySelector() {
+  Widget _buildDaySelector(List<EconomicEvent> events) {
     final now = DateTime.now();
+    // Start from 3 days ago to 7 days ahead to show "historical" context
+    final startDate = now.subtract(const Duration(days: 3));
+    
     return Container(
-      height: 80,
+      height: 90,
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: 7,
-        itemBuilder: (context, index) {
-          final date = now.add(Duration(days: index));
-          final bool isSelected = date.year == _selectedDate.year &&
-              date.month == _selectedDate.month &&
-              date.day == _selectedDate.day;
-          
-          return GestureDetector(
-            onTap: () => setState(() => _selectedDate = date),
-            child: Container(
-              width: 60,
-              margin: const EdgeInsets.only(right: 12),
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.02),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: isSelected ? AppColors.primary : Colors.white10),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(DateFormat('MMM').format(date).toUpperCase(), style: TextStyle(color: isSelected ? AppColors.primary : AppColors.textTertiary, fontSize: 10)),
-                  Text('${date.day}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isSelected ? AppColors.primary : Colors.white)),
-                ],
+      child: Row(
+        children: [
+          // Date Picker Trigger
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 8),
+            child: GestureDetector(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate,
+                  firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                  builder: (context, child) {
+                    return Theme(
+                      data: Theme.of(context).copyWith(
+                        colorScheme: ColorScheme.dark(
+                          primary: AppColors.primary,
+                          onPrimary: Colors.white,
+                          surface: AppColors.surface,
+                          onSurface: Colors.white,
+                        ),
+                      ),
+                      child: child!,
+                    );
+                  },
+                );
+                if (picked != null) {
+                  setState(() => _selectedDate = picked);
+                }
+              },
+              child: Container(
+                width: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: const Icon(Icons.calendar_month_rounded, color: AppColors.primary),
               ),
             ),
-          );
-        },
+          ),
+          
+          Expanded(
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.only(right: 20),
+              itemCount: 14, // Show 2 weeks of quick selection
+              itemBuilder: (context, index) {
+                final date = startDate.add(Duration(days: index));
+                final bool isSelected = date.year == _selectedDate.year &&
+                    date.month == _selectedDate.month &&
+                    date.day == _selectedDate.day;
+                final bool isToday = date.year == now.year &&
+                    date.month == now.month &&
+                    date.day == now.day;
+                
+                final eventsForDate = events.where((e) =>
+                    e.date.year == date.year &&
+                    e.date.month == date.month &&
+                    e.date.day == date.day).toList();
+
+                final hasHigh = eventsForDate.any((e) => e.impact == Impact.high);
+                final hasMedium = eventsForDate.any((e) => e.impact == Impact.medium);
+                final hasLow = eventsForDate.any((e) => e.impact == Impact.low);
+                
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedDate = date),
+                  child: Container(
+                    width: 60,
+                    margin: const EdgeInsets.only(right: 12),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : (isToday ? Colors.white.withValues(alpha: 0.05) : Colors.transparent),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: isSelected ? AppColors.primary : (isToday ? AppColors.primary.withValues(alpha: 0.3) : Colors.white10)),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          DateFormat('E').format(date).toUpperCase(), 
+                          style: TextStyle(
+                            color: isSelected ? AppColors.primary : AppColors.textTertiary, 
+                            fontSize: 10,
+                            fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                          )
+                        ),
+                        Text(
+                          '${date.day}', 
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold, 
+                            fontSize: 18, 
+                            color: isSelected ? AppColors.primary : Colors.white
+                          )
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (hasHigh) _buildImpactDot(AppColors.danger),
+                            if (hasMedium) _buildImpactDot(AppColors.warning),
+                            if (hasLow) _buildImpactDot(AppColors.textTertiary),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImpactDot(Color color) {
+    return Container(
+      width: 4,
+      height: 4,
+      margin: const EdgeInsets.symmetric(horizontal: 1),
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
       ),
     );
   }
@@ -156,9 +291,12 @@ class _EconomicCalendarScreenState extends ConsumerState<EconomicCalendarScreen>
     final timeDiff = event.date.difference(DateTime.now());
     final bool isSoon = timeDiff.inMinutes > 0 && timeDiff.inMinutes < 60;
 
-    return GlassCard(
-      padding: const EdgeInsets.all(16),
-      child: Column(
+    return GestureDetector(
+      onTap: () => _showEventDetailsBottomSheet(context, event),
+      child: GlassCard(
+        enableBlur: false,
+        padding: const EdgeInsets.all(16),
+        child: Column(
         children: [
           Row(
             children: [
@@ -235,13 +373,195 @@ class _EconomicCalendarScreenState extends ConsumerState<EconomicCalendarScreen>
           ],
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
     return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
+  }
+
+  void _showEventDetailsBottomSheet(BuildContext context, EconomicEvent event) {
+    final color = event.impact == Impact.high
+        ? AppColors.danger
+        : (event.impact == Impact.medium ? AppColors.warning : AppColors.textTertiary);
+        
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.background.withValues(alpha: 0.95),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border.all(
+              color: AppColors.surface.withValues(alpha: 0.5),
+              width: 1.5,
+            ),
+          ),
+          padding: const EdgeInsets.all(28),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white24,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: color.withValues(alpha: 0.4)),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.warning_amber_rounded, color: color, size: 14),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${event.impact.name.toUpperCase()} IMPACT',
+                          style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      const Icon(Icons.public_rounded, color: AppColors.textTertiary, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${event.currency} (${event.country})',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Text(
+                event.title,
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, height: 1.3),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_month_rounded, color: AppColors.primary, size: 16),
+                  const SizedBox(width: 8),
+                  Text(
+                    DateFormat('EEEE, dd MMMM yyyy - HH:mm').format(event.date),
+                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildMetricDetailCard(
+                      'ACTUAL', 
+                      event.actual ?? '-', 
+                      event.actual != null ? AppColors.success : AppColors.textTertiary,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMetricDetailCard('FORECAST', event.forecast ?? 'N/A', Colors.white),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMetricDetailCard('PREVIOUS', event.previous ?? 'N/A', Colors.white),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
+              const Text(
+                'AI MARKET ADVISORY',
+                style: TextStyle(
+                  color: AppColors.textTertiary, 
+                  fontWeight: FontWeight.bold, 
+                  letterSpacing: 1.5, 
+                  fontSize: 10,
+                ),
+              ),
+              const SizedBox(height: 12),
+              GlassCard(
+                enableBlur: false,
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.insights_rounded, color: AppColors.primary, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _generateAdvisoryText(event),
+                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 12, height: 1.5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMetricDetailCard(String label, String value, Color valueColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white10),
+      ),
+      child: Column(
+        children: [
+          Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: valueColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _generateAdvisoryText(EconomicEvent event) {
+    if (event.actual == null) {
+      return 'Rilis data ekonomi ini dijadwalkan dalam waktu dekat. Volatilitas tinggi sering terjadi pada instrumen terkait dengan ${event.currency} sesaat sebelum dan sesudah rilis. Disarankan untuk membatasi risiko (SL) Anda.';
+    }
+    
+    try {
+      final actualNum = double.parse(event.actual!.replaceAll(RegExp(r'[^0-9.-]'), ''));
+      final forecastNum = double.parse(event.forecast!.replaceAll(RegExp(r'[^0-9.-]'), ''));
+      
+      if (actualNum > forecastNum) {
+        return 'Hasil Aktual (${event.actual}) lebih tinggi dibanding Forecast (${event.forecast}). Secara teori makro, rilis ini cenderung memberikan sentimen positif/Bullish bagi mata uang ${event.currency}.';
+      } else if (actualNum < forecastNum) {
+        return 'Hasil Aktual (${event.actual}) lebih rendah dibanding Forecast (${event.forecast}). Secara teori makro, rilis ini cenderung memberikan sentimen negatif/Bearish bagi mata uang ${event.currency}.';
+      }
+    } catch (_) {}
+    
+    return 'Data aktual saat ini dirilis sebesar ${event.actual}. Perhatikan pergerakan harga pada instrumen ${event.currency} untuk mengidentifikasi apakah deviasi data ini direspon secara impulsif oleh pasar.';
   }
 }

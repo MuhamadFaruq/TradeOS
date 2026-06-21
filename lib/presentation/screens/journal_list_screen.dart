@@ -6,6 +6,11 @@ import '../../core/widgets/core_widgets.dart';
 import '../../data/models/trade.dart';
 import '../../data/providers/trade_provider.dart';
 import 'trade_detail_screen.dart';
+import 'dart:convert';
+import 'dart:io' show File;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:file_picker/file_picker.dart';
+import '../../core/services/csv_import_service.dart';
 
 class JournalListScreen extends ConsumerStatefulWidget {
   const JournalListScreen({super.key});
@@ -23,6 +28,201 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _importCSV(BuildContext context) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      if (!context.mounted) return;
+
+      // Show a loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+
+      String csvContent = '';
+      final fileObj = result.files.single;
+      
+      if (kIsWeb) {
+        final bytes = fileObj.bytes;
+        if (bytes != null) {
+          csvContent = utf8.decode(bytes);
+        }
+      } else {
+        final path = fileObj.path;
+        if (path != null) {
+          final file = File(path);
+          csvContent = await file.readAsString();
+        } else {
+          final bytes = fileObj.bytes;
+          if (bytes != null) {
+            csvContent = utf8.decode(bytes);
+          }
+        }
+      }
+
+      if (csvContent.isEmpty) {
+        if (context.mounted) {
+          Navigator.pop(context); // Close loading dialog
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('File CSV kosong atau tidak terbaca.')),
+          );
+        }
+        return;
+      }
+
+      final parsedTrades = CsvImportService.parseCsv(csvContent);
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+      }
+
+      if (parsedTrades.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Tidak ada data trade valid yang dapat diimpor.')),
+          );
+        }
+        return;
+      }
+
+      if (!context.mounted) return;
+
+      // Calculate statistics for preview
+      final total = parsedTrades.length;
+      final longs = parsedTrades.where((t) => t.direction == TradeDirection.long).length;
+      final shorts = parsedTrades.where((t) => t.direction == TradeDirection.short).length;
+      final wins = parsedTrades.where((t) => t.status == TradeStatus.won).length;
+      final losses = parsedTrades.where((t) => t.status == TradeStatus.lost).length;
+      final totalPnl = parsedTrades.fold(0.0, (sum, t) => sum + t.pnl);
+
+      // Get unique pairs
+      final pairs = parsedTrades.map((t) => t.pair).toSet().join(', ');
+
+      // Show summary bottom sheet
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: AppColors.surface,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (context) => Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Ringkasan Impor CSV',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Tinjau data berikut sebelum menyimpan ke database lokal.',
+                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              ),
+              const SizedBox(height: 24),
+              GlassCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _buildSummaryRow('Total Transaksi', '$total Trades'),
+                    const Divider(color: Colors.white10),
+                    _buildSummaryRow('Long / Short', '$longs L / $shorts S'),
+                    const Divider(color: Colors.white10),
+                    _buildSummaryRow('Win / Loss', '$wins W / $losses L'),
+                    const Divider(color: Colors.white10),
+                    _buildSummaryRow(
+                      'Estimasi Total P&L',
+                      '${totalPnl >= 0 ? '+' : ''}\$${totalPnl.toStringAsFixed(2)}',
+                      valueColor: totalPnl >= 0 ? AppColors.success : AppColors.danger,
+                    ),
+                    const Divider(color: Colors.white10),
+                    _buildSummaryRow('Daftar Pair', pairs, isTruncated: true),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text('BATAL', style: TextStyle(color: AppColors.textSecondary)),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: GlowingButton(
+                      text: 'IMPOR DATA',
+                      onPressed: () async {
+                        Navigator.pop(context); // Close bottom sheet
+                        // Add trades in batch
+                        await ref.read(tradeProvider.notifier).addTrades(parsedTrades);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Berhasil mengimpor $total data transaksi!'),
+                              backgroundColor: AppColors.success,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Terjadi kesalahan saat memproses file CSV: $e')),
+        );
+      }
+    }
+  }
+
+  Widget _buildSummaryRow(String label, String value, {Color? valueColor, bool isTruncated = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+          const SizedBox(width: 24),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              overflow: isTruncated ? TextOverflow.ellipsis : TextOverflow.visible,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: valueColor ?? Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -61,6 +261,11 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
       floating: true,
       title: const Text('Trading Journal', style: TextStyle(fontWeight: FontWeight.bold)),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.file_upload_rounded, color: AppColors.primary),
+          tooltip: 'Import CSV',
+          onPressed: () => _importCSV(context),
+        ),
         IconButton(
           icon: const Icon(Icons.filter_list_rounded, color: AppColors.primary),
           onPressed: () {
@@ -209,6 +414,7 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
                   ref.read(tradeProvider.notifier).deleteTrade(trade.id);
                 },
                 child: GlassCard(
+                  enableBlur: false,
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [

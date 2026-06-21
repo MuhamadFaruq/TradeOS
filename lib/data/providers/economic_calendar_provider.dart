@@ -5,14 +5,15 @@ import '../../core/services/economic_calendar_service.dart';
 
 final economicCalendarServiceProvider = Provider((ref) => EconomicCalendarService());
 
-final economicCalendarProvider = StreamProvider<List<EconomicEvent>>((ref) {
+// Auto-dispose stream provider to refresh whenever the screen is opened
+final economicCalendarProvider = StreamProvider.autoDispose<List<EconomicEvent>>((ref) {
   final service = ref.watch(economicCalendarServiceProvider);
   
-  // Initial fetch to populate Isar
+  // Fetch fresh events immediately when screen is loaded
   service.fetchEvents();
   
-  // Set up periodic fetching in the background to simulate real-time updates from server
-  final timer = Timer.periodic(const Duration(minutes: 5), (_) {
+  // Background polling every 60 seconds while the screen is active
+  final timer = Timer.periodic(const Duration(seconds: 60), (_) {
     service.fetchEvents();
   });
   
@@ -21,7 +22,19 @@ final economicCalendarProvider = StreamProvider<List<EconomicEvent>>((ref) {
   return service.watchEvents();
 });
 
-// For manual refresh trigger
+// Track if a manual/automatic refresh is actively downloading
+final calendarRefreshingProvider = StateProvider<bool>((ref) => false);
+
+// Manual refresh trigger that manages the refreshing state
 final economicCalendarRefreshProvider = Provider((ref) {
-  return () => ref.read(economicCalendarServiceProvider).fetchEvents();
+  return () async {
+    ref.read(calendarRefreshingProvider.notifier).state = true;
+    try {
+      await ref.read(economicCalendarServiceProvider).fetchEvents();
+    } catch (_) {
+      // Ignore or handle fetch errors gracefully
+    } finally {
+      ref.read(calendarRefreshingProvider.notifier).state = false;
+    }
+  };
 });

@@ -47,7 +47,7 @@ class ProfileScreen extends ConsumerWidget {
           _buildActionItem(
             Icons.download_rounded, 
             'Export Trade History (CSV)', 
-            onTap: () => _handleExport(context),
+            onTap: () => _handleExport(context, ref),
           ),
           _buildActionItem(
             Icons.delete_forever_rounded, 
@@ -132,14 +132,16 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               Icon(icon, color: isDestructive ? AppColors.danger : AppColors.textSecondary, size: 22),
               const SizedBox(width: 16),
-              Text(
-                title, 
-                style: TextStyle(
-                  fontWeight: FontWeight.w500, 
-                  color: isDestructive ? AppColors.danger : Colors.white
-                )
+              Expanded(
+                child: Text(
+                  title, 
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500, 
+                    color: isDestructive ? AppColors.danger : Colors.white
+                  ),
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 16),
               Icon(Icons.arrow_forward_ios_rounded, color: isDestructive ? AppColors.danger.withValues(alpha: 0.5) : AppColors.textTertiary, size: 14),
             ],
           ),
@@ -170,10 +172,28 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _handleExport(BuildContext context) {
+  void _handleExport(BuildContext context, WidgetRef ref) {
+    final trades = ref.read(tradeProvider);
+    if (trades.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No trades to export.')),
+      );
+      return;
+    }
+
+    // Create simple CSV string
+    final buffer = StringBuffer();
+    buffer.writeln('ID,Pair,Direction,Entry,Exit,PnL,PnL%,Status,Date,Strategy');
+    for (var t in trades) {
+      buffer.writeln(
+        '${t.id},${t.pair},${t.direction.name},${t.entryPrice},${t.exitPrice ?? ''},${t.pnl},${t.pnlPercentage},${t.status.name},${t.date.toIso8601String()},${t.strategy ?? ''}'
+      );
+    }
+
+    // Simulate export
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Trade history exported to Downloads folder.'),
+      SnackBar(
+        content: Text('CSV Export ready (${trades.length} trades). Simulated download complete.'),
         backgroundColor: AppColors.success,
       ),
     );
@@ -185,7 +205,7 @@ class ProfileScreen extends ConsumerWidget {
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surface,
         title: const Text('Clear All Data?'),
-        content: const Text('This action will permanently delete all trade records. This cannot be undone.'),
+        content: const Text('Do you want to clear all trade records? You can also optionally reset your initial balance to zero.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -194,12 +214,22 @@ class ProfileScreen extends ConsumerWidget {
           TextButton(
             onPressed: () {
               ref.read(tradeProvider.notifier).clearAllTrades();
+              
+              // Reset profile balance to 0
+              final profile = ref.read(profileProvider);
+              if (profile != null) {
+                profile.initialBalance = 0.0;
+                profile.dailyProfitTarget = 0.0;
+                profile.weeklyProfitTarget = 0.0;
+                ref.read(profileProvider.notifier).updateProfile(profile);
+              }
+              
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('All trade data has been cleared.')),
+                const SnackBar(content: Text('All trade data and balance have been reset.')),
               );
             },
-            child: const Text('CLEAR ALL', style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold)),
+            child: const Text('RESET EVERYTHING', style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

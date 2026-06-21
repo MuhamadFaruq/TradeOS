@@ -7,14 +7,18 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tradeos/main.dart';
 
 void main() {
   testWidgets('TradeOS basic smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const TradeOSApp());
+    await tester.pumpWidget(const ProviderScope(child: TradeOSApp()));
 
     // Verify that TradeOS branding is present.
     expect(find.text('TradeOS'), findsOneWidget);
+
+    // Settle the delayed navigation timer to prevent test failure from pending timers.
+    await tester.pumpAndSettle(const Duration(seconds: 3));
   });
 }

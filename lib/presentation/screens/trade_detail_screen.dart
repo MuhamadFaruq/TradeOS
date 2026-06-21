@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/core_widgets.dart';
 import '../../data/models/trade.dart';
+import 'tradingview_chart_screen.dart';
+import 'trade_replay_screen.dart';
 
 class TradeDetailScreen extends StatelessWidget {
   final Trade trade;
@@ -24,7 +26,9 @@ class TradeDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(trade, statusColor),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
+                  _buildTradingViewButton(context),
+                  const SizedBox(height: 24),
                   _buildStatsGrid(),
                   const SizedBox(height: 32),
                   _buildLabel('Analysis & Screenshots'),
@@ -110,9 +114,44 @@ class TradeDetailScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '${trade.direction.name.toUpperCase()} • ${trade.strategy} • ${_formatDate(trade.date)}',
+          '${trade.direction.name.toUpperCase()} • ${trade.strategy ?? "No Strategy"} • ${_formatDate(trade.date)}',
           style: const TextStyle(color: AppColors.textSecondary),
         ),
+        if (trade.commission > 0 || trade.swap != 0) ...[
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              if (trade.commission > 0)
+                Padding(
+                  padding: const EdgeInsets.only(right: 16.0),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.receipt_long_rounded, color: AppColors.textTertiary, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Comm: -\$${trade.commission.toStringAsFixed(2)}',
+                        style: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              if (trade.swap != 0)
+                Row(
+                  children: [
+                    const Icon(Icons.swap_horizontal_circle_rounded, color: AppColors.textTertiary, size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Swap: ${trade.swap >= 0 ? '+' : ''}\$${trade.swap.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        color: trade.swap >= 0 ? AppColors.success.withValues(alpha: 0.7) : AppColors.danger.withValues(alpha: 0.7),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -232,6 +271,62 @@ class TradeDetailScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTradingViewButton(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TradingViewChartScreen(initialPair: trade.pair),
+                ),
+              );
+            },
+            icon: const Icon(Icons.trending_up_rounded, color: Colors.black),
+            label: const Text(
+              'ANALISIS LIVE TRADINGVIEW',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              elevation: 0,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TradeReplayScreen(trade: trade),
+                ),
+              );
+            },
+            icon: const Icon(Icons.history_rounded, color: AppColors.primary),
+            label: const Text(
+              'PUTAR REPLAY TRADE (VISUAL)',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5, color: Colors.white),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: AppColors.primary),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

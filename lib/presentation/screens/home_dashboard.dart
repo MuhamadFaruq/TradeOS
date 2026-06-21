@@ -20,6 +20,7 @@ import 'community_screen.dart';
 import 'goals_screen.dart';
 import 'weekly_review_screen.dart';
 import 'trade_replay_screen.dart';
+import 'tradingview_chart_screen.dart';
 
 class _HomeContent extends ConsumerWidget {
   const _HomeContent();
@@ -30,7 +31,7 @@ class _HomeContent extends ConsumerWidget {
     final notifier = ref.read(tradeProvider.notifier);
     final profile = ref.watch(profileProvider);
     
-    final initialBalance = profile?.initialBalance ?? 10000.0;
+    final initialBalance = profile?.initialBalance ?? 0.0;
     
     return CustomScrollView(
       slivers: [
@@ -148,7 +149,7 @@ class _HomeContent extends ConsumerWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.primary.withValues(alpha: 0.2), Colors.transparent],
+                colors: [AppColors.primary.withValues(alpha: 0.15), Colors.transparent],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -202,6 +203,7 @@ class _HomeContent extends ConsumerWidget {
 
   Widget _buildStatItem(BuildContext context, String label, String value, Color color) {
     return GlassCard(
+      enableBlur: false,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       child: Column(
         children: [
@@ -261,6 +263,7 @@ class _HomeContent extends ConsumerWidget {
             );
           },
           child: GlassCard(
+            enableBlur: false,
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
@@ -365,13 +368,9 @@ class _HomeContent extends ConsumerWidget {
         ),
         const SizedBox(width: 12),
         _ActionItem(
-          icon: Icons.mic_rounded,
-          label: 'Voice',
-          onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Voice trade logging coming soon...'), backgroundColor: AppColors.primary),
-            );
-          },
+          icon: Icons.trending_up_rounded,
+          label: 'Charts',
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const TradingViewChartScreen())),
         ),
       ],
     );
@@ -391,6 +390,7 @@ class _ActionItem extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: GlassCard(
+          enableBlur: false,
           padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
             children: [

@@ -22,9 +22,13 @@ class Trade {
   late double pnl;
   late double pnlPercentage;
   double leverage = 1.0;
+  double commission = 0.0;
+  double swap = 0.0;
 
   @enumerated
   late TradeStatus status;
+
+  bool get isLong => direction == TradeDirection.long;
 
   @Index()
   late DateTime date;
@@ -35,6 +39,10 @@ class Trade {
   String? emotion;
   String? session;
   int? confidence;
+
+  // === MISTAKE / RULE BREAKING TRACKING ===
+  bool wasRuleBroken = false;
+  String? brokenRule;
 
   // === ADVANCED METRICS (Order Flow Analysis) ===
   // Cumulative Volume Delta - difference between buy volume and sell volume
@@ -84,6 +92,10 @@ class Trade {
     this.emotion,
     this.session,
     this.confidence,
+    this.wasRuleBroken = false,
+    this.brokenRule,
+    this.commission = 0.0,
+    this.swap = 0.0,
     this.cvd,
     this.volumeImbalance,
     this.totalVolume,

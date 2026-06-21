@@ -8,56 +8,24 @@ final tradeProvider = StateNotifierProvider<TradeNotifier, List<Trade>>((ref) {
 });
 
 class TradeNotifier extends StateNotifier<List<Trade>> {
-  static const int _pageSize = 50; // Limit untuk pagination
-  int _currentOffset = 0;
 
   TradeNotifier() : super([]) {
     _loadTrades();
   }
 
-  // Load trades dengan pagination
-  Future<void> _loadTrades({int limit = _pageSize, int offset = 0}) async {
+  // Load all trades from Isar
+  Future<void> _loadTrades() async {
     try {
       final isar = await IsarService.getInstance();
-
-      // Isar query dengan skip dan limit
-      final allTrades = await isar.trades.where().sortByDateDesc().findAll();
-
-      // Manual pagination
-      final start = offset;
-      final end = (offset + limit).clamp(0, allTrades.length);
-
-      if (start >= allTrades.length) {
-        // Jika sudah exceed total, return empty
-        if (offset == 0) {
-          state = [];
-        }
-        return;
-      }
-
-      final paginatedTrades = allTrades.sublist(start, end);
-
-      if (offset == 0) {
-        state = paginatedTrades;
-      } else {
-        // Append untuk infinite scroll
-        state = [...state, ...paginatedTrades];
-      }
-      _currentOffset = offset + limit;
+      state = await isar.trades.where().sortByDateDesc().findAll();
     } catch (e) {
       print('Error loading trades: $e');
     }
   }
 
-  // Load first page
+  // Reload trades from DB
   Future<void> refreshTrades() async {
-    _currentOffset = 0;
-    await _loadTrades(offset: 0);
-  }
-
-  // Load next page (infinite scroll)
-  Future<void> loadMoreTrades() async {
-    await _loadTrades(offset: _currentOffset);
+    await _loadTrades();
   }
 
   Future<void> addTrade(Trade trade) async {
@@ -84,10 +52,26 @@ class TradeNotifier extends StateNotifier<List<Trade>> {
     }
   }
 
-  // Statistics calculations
   double get totalPnL {
     if (state.isEmpty) return 0.0;
     return state.fold(0.0, (sum, item) => sum + item.pnl);
+  }
+
+  double get mistakeCosts {
+    final mistakeTrades = state.where((t) => t.wasRuleBroken && t.pnl < 0).toList();
+    return mistakeTrades.fold(0.0, (sum, t) => sum + t.pnl.abs());
+  }
+
+  double get disciplineRate {
+    if (state.isEmpty) return 100.0;
+    final total = state.length;
+    final broken = state.where((t) => t.wasRuleBroken).length;
+    return ((total - broken) / total) * 100;
+  }
+
+  double get disciplinedPnL {
+    final disciplinedTrades = state.where((t) => !t.wasRuleBroken).toList();
+    return disciplinedTrades.fold(0.0, (sum, t) => sum + t.pnl);
   }
 
   double get winRate {
@@ -100,6 +84,22 @@ class TradeNotifier extends StateNotifier<List<Trade>> {
 
     final wins = closedTrades.where((t) => t.status == TradeStatus.won).length;
     return (wins / closedTrades.length) * 100;
+  }
+
+  double get profitFactor {
+    final closedTrades = state
+        .where((t) => t.status == TradeStatus.won || t.status == TradeStatus.lost)
+        .toList();
+    
+    final grossProfit =
+        closedTrades.where((t) => t.pnl > 0).fold(0.0, (sum, t) => sum + t.pnl);
+    final grossLoss =
+        closedTrades.where((t) => t.pnl < 0).fold(0.0, (sum, t) => sum + t.pnl.abs());
+
+    if (grossLoss == 0) {
+      return grossProfit > 0 ? 999.99 : 0.0;
+    }
+    return grossProfit / grossLoss;
   }
 
   // === LONG POSITION METRICS ===
@@ -173,7 +173,7 @@ class TradeNotifier extends StateNotifier<List<Trade>> {
   }
 
   // === ADVANCED FILTERING ===
-  List<Trade> getTrade sByDirection(TradeDirection direction) {
+  List<Trade> getTradesByDirection(TradeDirection direction) {
     return state.where((t) => t.direction == direction).toList();
   }
 
@@ -188,7 +188,7 @@ class TradeNotifier extends StateNotifier<List<Trade>> {
     ).toList();
   }
 
-  double get winRateForShortWithAnomalies() {
+  double get winRateForShortWithAnomalies {
     final anomalousShorts = getShortTradesWithCVDAnomalies()
         .where((t) => t.status == TradeStatus.won || t.status == TradeStatus.lost)
         .toList();
@@ -206,25 +206,23 @@ class TradeNotifier extends StateNotifier<List<Trade>> {
   List<Trade> getTradesWithScreenshots() {
     return state.where((t) => t.hasScreenshots()).toList();
   }
-    final grossProfit =
-        state.where((t) => t.pnl > 0).fold(0.0, (sum, t) => sum + t.pnl);
-    final grossLoss =
-        state.where((t) => t.pnl < 0).fold(0.0, (sum, t) => sum + t.pnl.abs());
-
-    // Fix untuk tidak return infinity
-    if (grossLoss == 0) {
-      return grossProfit > 0 ? 999.99 : 0.0; // Cap at 999.99 instead of infinity
-    }
-    if (grossProfit == 0 && grossLoss == 0) {
-      return 0.0;
-    }
-    return grossProfit / grossLoss;
-  }
 
   // Account Growth Calculation
   double calculateGrowth(double initialBalance) {
     if (initialBalance <= 0) return 0.0;
     return (totalPnL / initialBalance) * 100;
+  }
+
+  Future<void> addTrades(List<Trade> newTrades) async {
+    try {
+      final isar = await IsarService.getInstance();
+      await isar.writeTxn(() async {
+        await isar.trades.putAll(newTrades);
+      });
+      await refreshTrades();
+    } catch (e) {
+      print('Error adding batch trades: $e');
+    }
   }
 
   Future<void> clearAllTrades() async {

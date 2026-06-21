@@ -5,36 +5,44 @@ import 'isar_service.dart';
 import 'package:isar/isar.dart';
 
 class EconomicCalendarService {
-  // Replace with a real API key in production
-  static const String _baseUrl = 'https://api.example.com/economic-calendar';
-
   static const String _realApiUrl = 'https://nfs.faireconomy.media/ff_calendar_thisweek.json';
 
-  Future<List<EconomicEvent>> fetchEvents() async {
+  Future<List<EconomicEvent>> fetchEvents({DateTime? start, DateTime? end}) async {
     try {
+      // Use this week's data by default
       final response = await http.get(Uri.parse('$_realApiUrl?t=${DateTime.now().millisecondsSinceEpoch}'));
       
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
-        final List<EconomicEvent> events = data.map((json) {
-          final String impactStr = (json['impact'] as String).toLowerCase();
-          Impact impact = Impact.low;
-          if (impactStr == 'medium') impact = Impact.medium;
-          if (impactStr == 'high') impact = Impact.high;
+        final List<EconomicEvent> events = [];
+        
+        for (var item in data) {
+          try {
+            final String impactStr = (item['impact'] as String).toLowerCase();
+            Impact impactLevel = Impact.low;
+            if (impactStr == 'medium') impactLevel = Impact.medium;
+            if (impactStr == 'high') impactLevel = Impact.high;
 
-          return EconomicEvent()
-            ..title = json['title']
-            ..country = json['country']
-            ..currency = json['country']
-            ..date = DateTime.parse(json['date']).toLocal()
-            ..impact = impact
-            ..forecast = json['forecast']
-            ..previous = json['previous']
-            ..actual = json['actual'];
-        }).toList();
+            final event = EconomicEvent()
+              ..title = item['title'] ?? 'Unknown Event'
+              ..country = item['country'] ?? ''
+              ..currency = item['country'] ?? ''
+              ..date = DateTime.parse(item['date']).toLocal()
+              ..impact = impactLevel
+              ..forecast = item['forecast']
+              ..previous = item['previous']
+              ..actual = item['actual'];
+            
+            events.add(event);
+          } catch (e) {
+            print('Error parsing event: $e');
+          }
+        }
 
-        // Save to Isar for offline access
+        // Save to Isar
         await IsarService.isar.writeTxn(() async {
+          // Only clear and replace if we fetched a full week or significant range
+          // For now, keep it simple as the free API provides week-at-a-time
           await IsarService.isar.economicEvents.clear();
           await IsarService.isar.economicEvents.putAll(events);
         });
@@ -44,7 +52,7 @@ class EconomicCalendarService {
         throw Exception('Failed to load real-time calendar');
       }
     } catch (e) {
-      // Return cached data if offline
+      print('Fetch error: $e');
       return await IsarService.isar.economicEvents.where().sortByDate().findAll();
     }
   }

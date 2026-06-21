@@ -57,17 +57,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final tradingStyle = prefs.getString('tradingStyle');
       final isPropFirmTrader = prefs.getBool('isPropFirmTrader') ?? false;
 
-      if (isLoggedIn) {
-        state = AuthState(
-          isLoggedIn: true,
-          email: email,
-          userName: userName,
-          tradingType: tradingType,
-          experienceLevel: experienceLevel,
-          tradingStyle: tradingStyle,
-          isPropFirmTrader: isPropFirmTrader,
-        );
-      }
+      state = AuthState(
+        isLoggedIn: isLoggedIn,
+        email: email,
+        userName: userName,
+        tradingType: tradingType,
+        experienceLevel: experienceLevel,
+        tradingStyle: tradingStyle,
+        isPropFirmTrader: isPropFirmTrader,
+      );
     } catch (e) {
       print('Error loading auth state: $e');
     }
