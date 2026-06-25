@@ -40,7 +40,7 @@ void main() async {
   
   // Initialize Background Services
   await NotificationService.init();
-  Workmanager().initialize(callbackDispatcher, isInDebugMode: true);
+  Workmanager().initialize(callbackDispatcher);
   Workmanager().registerPeriodicTask(
     'daily-news-check',
     'fetchEconomicNews',
@@ -86,7 +86,7 @@ class InitialLoadingApp extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(
+              const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               ),
               const SizedBox(height: 24),

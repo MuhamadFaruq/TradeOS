@@ -3,13 +3,17 @@ import 'package:isar/isar.dart';
 import '../models/trade.dart';
 import '../../core/services/isar_service.dart';
 
+import 'portfolio_provider.dart';
+
 final tradeProvider = StateNotifierProvider<TradeNotifier, List<Trade>>((ref) {
-  return TradeNotifier();
+  final activePortfolioId = ref.watch(activePortfolioIdProvider);
+  return TradeNotifier(activePortfolioId);
 });
 
 class TradeNotifier extends StateNotifier<List<Trade>> {
+  final int? activePortfolioId;
 
-  TradeNotifier() : super([]) {
+  TradeNotifier(this.activePortfolioId) : super([]) {
     _loadTrades();
   }
 
@@ -17,7 +21,15 @@ class TradeNotifier extends StateNotifier<List<Trade>> {
   Future<void> _loadTrades() async {
     try {
       final isar = await IsarService.getInstance();
-      state = await isar.trades.where().sortByDateDesc().findAll();
+      final allTrades = await isar.trades.where().sortByDateDesc().findAll();
+      
+      if (activePortfolioId != null) {
+        state = allTrades.where((t) => t.portfolioId == activePortfolioId).toList();
+      } else {
+        // If no active portfolio, default to showing unassigned trades or default logic.
+        // For now, let's show trades that have no portfolioId or belong to default.
+        state = allTrades.where((t) => t.portfolioId == null).toList();
+      }
     } catch (e) {
       print('Error loading trades: $e');
     }
@@ -52,6 +64,35 @@ class TradeNotifier extends StateNotifier<List<Trade>> {
     }
   }
 
+  double get maxDrawdown {
+    if (state.isEmpty) return 0.0;
+    
+    final sortedTrades = List<Trade>.from(state)..sort((a, b) => a.date.compareTo(b.date));
+    double peak = 0.0;
+    double currentEquity = 0.0;
+    double maxDD = 0.0;
+    
+    // We assume initial balance is handled at the portfolio level, 
+    // but for MDD percentage, we can calculate based on peak equity.
+    // If we only have PnL, we can calculate absolute drawdown.
+    // To calculate percentage, we need a base balance. We'll return absolute MDD for now 
+    // or calculate it as a percentage of peak if peak > 0.
+    
+    for (var trade in sortedTrades) {
+      currentEquity += trade.pnl;
+      if (currentEquity > peak) {
+        peak = currentEquity;
+      }
+      
+      double drawdown = peak - currentEquity;
+      if (drawdown > maxDD) {
+        maxDD = drawdown;
+      }
+    }
+    
+    return maxDD;
+  }
+  
   double get totalPnL {
     if (state.isEmpty) return 0.0;
     return state.fold(0.0, (sum, item) => sum + item.pnl);
@@ -178,7 +219,7 @@ class TradeNotifier extends StateNotifier<List<Trade>> {
   }
 
   List<Trade> getTradesByStrategy(String strategy) {
-    return state.where((t) => t.strategy == strategy).toList();
+    return state.where((t) => t.confluences?.contains(strategy) ?? false).toList();
   }
 
   List<Trade> getShortTradesWithCVDAnomalies() {

@@ -8,6 +8,7 @@ import 'personal_info_screen.dart';
 import 'app_preferences_screen.dart';
 import 'security_settings_screen.dart';
 import 'auth_screen.dart';
+import '../../core/services/export_service.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -46,7 +47,7 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 16),
           _buildActionItem(
             Icons.download_rounded, 
-            'Export Trade History (CSV)', 
+            'Export Trade History (PDF/CSV)', 
             onTap: () => _handleExport(context, ref),
           ),
           _buildActionItem(
@@ -181,20 +182,101 @@ class ProfileScreen extends ConsumerWidget {
       return;
     }
 
-    // Create simple CSV string
-    final buffer = StringBuffer();
-    buffer.writeln('ID,Pair,Direction,Entry,Exit,PnL,PnL%,Status,Date,Strategy');
-    for (var t in trades) {
-      buffer.writeln(
-        '${t.id},${t.pair},${t.direction.name},${t.entryPrice},${t.exitPrice ?? ''},${t.pnl},${t.pnlPercentage},${t.status.name},${t.date.toIso8601String()},${t.strategy ?? ''}'
-      );
-    }
+    final profile = ref.read(profileProvider);
 
-    // Simulate export
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Export Trade History',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Choose your preferred format. PDF is a beautiful analytical report, while CSV is ideal for external spreadsheet imports.',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 24),
+                ListTile(
+                  leading: const Icon(Icons.picture_as_pdf_rounded, color: AppColors.primary),
+                  title: const Text('Export PDF Report', style: TextStyle(color: Colors.white)),
+                  subtitle: const Text('With premium visual formatting & statistics', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    _showLoading(context, 'Generating PDF...');
+                    try {
+                      final path = await ExportService.exportToPdf(trades, profile);
+                      if (!context.mounted) return;
+                      Navigator.pop(context); // close loading
+                      await ExportService.shareFile(path, 'TradeOS PDF Report');
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      Navigator.pop(context); // close loading
+                      _showError(context, 'Failed to generate PDF: $e');
+                    }
+                  },
+                ),
+                const Divider(color: AppColors.textTertiary, height: 1),
+                ListTile(
+                  leading: const Icon(Icons.table_rows_rounded, color: AppColors.primary),
+                  title: const Text('Export CSV Spreadsheet', style: TextStyle(color: Colors.white)),
+                  subtitle: const Text('Compatible with Excel and Google Sheets', style: TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    _showLoading(context, 'Generating CSV...');
+                    try {
+                      final path = await ExportService.exportToCsv(trades);
+                      if (!context.mounted) return;
+                      Navigator.pop(context); // close loading
+                      await ExportService.shareFile(path, 'TradeOS CSV Export');
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      Navigator.pop(context); // close loading
+                      _showError(context, 'Failed to generate CSV: $e');
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showLoading(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        content: Row(
+          children: [
+            const CircularProgressIndicator(color: AppColors.primary),
+            const SizedBox(width: 20),
+            Text(message, style: const TextStyle(color: Colors.white)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showError(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('CSV Export ready (${trades.length} trades). Simulated download complete.'),
-        backgroundColor: AppColors.success,
+        content: Text(message),
+        backgroundColor: AppColors.danger,
       ),
     );
   }
@@ -212,8 +294,8 @@ class ProfileScreen extends ConsumerWidget {
             child: const Text('CANCEL', style: TextStyle(color: AppColors.textSecondary)),
           ),
           TextButton(
-            onPressed: () {
-              ref.read(tradeProvider.notifier).clearAllTrades();
+            onPressed: () async {
+              await ref.read(tradeProvider.notifier).clearAllTrades();
               
               // Reset profile balance to 0
               final profile = ref.read(profileProvider);
@@ -221,13 +303,15 @@ class ProfileScreen extends ConsumerWidget {
                 profile.initialBalance = 0.0;
                 profile.dailyProfitTarget = 0.0;
                 profile.weeklyProfitTarget = 0.0;
-                ref.read(profileProvider.notifier).updateProfile(profile);
+                await ref.read(profileProvider.notifier).updateProfile(profile);
               }
               
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('All trade data and balance have been reset.')),
-              );
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('All trade data and balance have been reset.')),
+                );
+              }
             },
             child: const Text('RESET EVERYTHING', style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold)),
           ),

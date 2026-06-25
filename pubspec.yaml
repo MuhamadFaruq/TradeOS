@@ -26,6 +26,9 @@ dependencies:
   csv: ^6.0.0
   webview_flutter: ^4.8.0
   local_auth: ^2.3.0
+  pdf: ^3.11.1
+  share_plus: ^10.0.2
+  crypto: ^3.0.6
 
 dev_dependencies:
   flutter_test:

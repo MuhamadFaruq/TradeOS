@@ -86,7 +86,7 @@ class _TradingViewChartScreenState extends State<TradingViewChartScreen> {
           },
         ),
       )
-      ..loadHtmlString(htmlContent);
+      ..loadHtmlString(htmlContent, baseUrl: 'https://s3.tradingview.com');
   }
 
   @override

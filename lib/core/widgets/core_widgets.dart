@@ -1,8 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme/app_colors.dart';
+import '../../data/providers/performance_provider.dart';
 
-class GlassCard extends StatelessWidget {
+class GlassCard extends ConsumerWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final double borderRadius;
@@ -19,13 +21,16 @@ class GlassCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final globalBlurEnabled = ref.watch(performanceProvider);
+    final shouldBlur = enableBlur && globalBlurEnabled;
+
     Widget content = Padding(
       padding: padding ?? const EdgeInsets.all(20),
       child: child,
     );
 
-    if (enableBlur) {
+    if (shouldBlur) {
       content = ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: BackdropFilter(
@@ -37,7 +42,7 @@ class GlassCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.cardBackground.withValues(alpha: enableBlur ? 0.7 : 0.9),
+        color: AppColors.cardBackground.withValues(alpha: shouldBlur ? 0.7 : 0.9),
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
           color: borderColor ?? AppColors.surface.withValues(alpha: 0.5),

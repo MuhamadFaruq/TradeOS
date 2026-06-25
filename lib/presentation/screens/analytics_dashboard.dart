@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/core_widgets.dart';
 import '../../data/providers/trade_provider.dart';
@@ -62,13 +63,15 @@ class AnalyticsDashboard extends ConsumerWidget {
                                 notifier.profitFactor,
                                 notifier.disciplineRate,
                                 notifier.mistakeCosts,
+                                notifier.maxDrawdown,
                                 realEquity,
                                 discEquity,
                               ),
                               const SizedBox(height: 30),
+                              const SizedBox(height: 30),
                               _buildPnLHeatmap(context, trades),
                               const SizedBox(height: 30),
-                              _buildSessionAnalytics(context),
+                              _buildSessionAnalytics(context, trades),
                               const SizedBox(height: 30),
                               _buildSetupBreakdown(context, trades),
                               const SizedBox(height: 100),
@@ -105,6 +108,7 @@ class AnalyticsDashboard extends ConsumerWidget {
     double pf, 
     double disciplineRate, 
     double mistakeCosts,
+    double maxDrawdown,
     List<double> realEquity,
     List<double> discEquity,
   ) {
@@ -168,12 +172,17 @@ class AnalyticsDashboard extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildSimpleStat(
-                'Discipline Rate', 
+                'Discipline', 
                 '${disciplineRate.toStringAsFixed(1)}%', 
                 disciplineRate >= 70 ? AppColors.success : AppColors.warning,
               ),
               _buildSimpleStat(
-                'Mistake Costs', 
+                'Max DD', 
+                '\$${maxDrawdown.toStringAsFixed(2)}', 
+                maxDrawdown > 0 ? AppColors.danger : AppColors.success,
+              ),
+              _buildSimpleStat(
+                'Mistakes', 
                 '-\$${mistakeCosts.toStringAsFixed(2)}', 
                 mistakeCosts > 0 ? AppColors.danger : AppColors.success,
               ),
@@ -366,11 +375,23 @@ class AnalyticsDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildPnLHeatmap(BuildContext context, List<dynamic> trades) {
+  Widget _buildPnLHeatmap(BuildContext context, List<Trade> trades) {
+    // Group trades by date (yyyy-MM-dd)
+    final Map<String, double> dailyPnl = {};
+    for (var trade in trades) {
+      final key = DateFormat('yyyy-MM-dd').format(trade.date);
+      dailyPnl[key] = (dailyPnl[key] ?? 0.0) + trade.pnl;
+    }
+
+    final now = DateTime.now();
+    final startDate = now.subtract(const Duration(days: 34));
+    final int daysToMonday = startDate.weekday - 1;
+    final alignedStartDate = startDate.subtract(Duration(days: daysToMonday));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('PnL Heatmap', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        const Text('PnL Heatmap (Last 5 Weeks)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         const SizedBox(height: 16),
         GlassCard(
           enableBlur: false,
@@ -379,7 +400,11 @@ class AnalyticsDashboard extends ConsumerWidget {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((e) => Text(e, style: const TextStyle(color: AppColors.textTertiary))).toList(),
+                children: ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+                    .map((e) => Expanded(
+                          child: Text(e, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textTertiary, fontSize: 11)),
+                        ))
+                    .toList(),
               ),
               const SizedBox(height: 12),
               RepaintBoundary(
@@ -393,17 +418,28 @@ class AnalyticsDashboard extends ConsumerWidget {
                   ),
                   itemCount: 35,
                   itemBuilder: (context, index) {
-                    // Simply mock some colors for now but based on index parity for visual interest
-                    Color color;
-                    if (index % 5 == 0) {
-                      color = AppColors.success.withValues(alpha: 0.8);
-                    } else if (index % 7 == 0) color = AppColors.danger.withValues(alpha: 0.6);
-                    else color = Colors.white.withValues(alpha: 0.05);
-                    
+                    final date = alignedStartDate.add(Duration(days: index));
+                    final key = DateFormat('yyyy-MM-dd').format(date);
+                    final pnl = dailyPnl[key];
+
+                    Color color = Colors.white.withValues(alpha: 0.05);
+                    if (pnl != null) {
+                      if (pnl > 0) {
+                        color = AppColors.success.withValues(alpha: 0.8);
+                      } else if (pnl < 0) {
+                        color = AppColors.danger.withValues(alpha: 0.6);
+                      } else {
+                        color = Colors.white.withValues(alpha: 0.15);
+                      }
+                    }
+
                     return Container(
                       decoration: BoxDecoration(
                         color: color,
                         borderRadius: BorderRadius.circular(4),
+                        border: date.year == now.year && date.month == now.month && date.day == now.day
+                            ? Border.all(color: AppColors.primary, width: 1.5)
+                            : null,
                       ),
                     );
                   },
@@ -416,17 +452,37 @@ class AnalyticsDashboard extends ConsumerWidget {
     );
   }
 
-  Widget _buildSessionAnalytics(BuildContext context) {
+  Widget _buildSessionAnalytics(BuildContext context, List<Trade> trades) {
+    final closedTrades = trades.where((t) => t.status == TradeStatus.won || t.status == TradeStatus.lost).toList();
+
+    double getSessionWinRate(String sessionName) {
+      final sessionTrades = closedTrades.where((t) => t.session?.toUpperCase() == sessionName.toUpperCase()).toList();
+      if (sessionTrades.isEmpty) return 0.0;
+      final wins = sessionTrades.where((t) => t.status == TradeStatus.won).length;
+      return wins / sessionTrades.length;
+    }
+
+    final double londonRate = getSessionWinRate('LONDON');
+    final double nyRateCombined = closedTrades.where((t) => t.session?.toUpperCase() == 'NEW YORK' || t.session?.toUpperCase() == 'NEWYORK').isEmpty 
+        ? 0.0 
+        : (closedTrades.where((t) => (t.session?.toUpperCase() == 'NEW YORK' || t.session?.toUpperCase() == 'NEWYORK') && t.status == TradeStatus.won).length / 
+           closedTrades.where((t) => t.session?.toUpperCase() == 'NEW YORK' || t.session?.toUpperCase() == 'NEWYORK').length);
+
+    final double asiaRateCombined = closedTrades.where((t) => t.session?.toUpperCase() == 'ASIA' || t.session?.toUpperCase() == 'TOKYO' || t.session?.toUpperCase() == 'TOKYO/ASIA').isEmpty
+        ? 0.0
+        : (closedTrades.where((t) => (t.session?.toUpperCase() == 'ASIA' || t.session?.toUpperCase() == 'TOKYO' || t.session?.toUpperCase() == 'TOKYO/ASIA') && t.status == TradeStatus.won).length /
+           closedTrades.where((t) => t.session?.toUpperCase() == 'ASIA' || t.session?.toUpperCase() == 'TOKYO' || t.session?.toUpperCase() == 'TOKYO/ASIA').length);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Session Performance', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         const SizedBox(height: 16),
-        _buildSessionRow('London Session', 0.75),
+        _buildSessionRow('London Session', londonRate),
         const SizedBox(height: 12),
-        _buildSessionRow('New York Session', 0.42),
+        _buildSessionRow('New York Session', nyRateCombined),
         const SizedBox(height: 12),
-        _buildSessionRow('Asian Session', 0.15),
+        _buildSessionRow('Asian Session', asiaRateCombined),
       ],
     );
   }
@@ -461,7 +517,7 @@ class AnalyticsDashboard extends ConsumerWidget {
     // Group trades by strategy
     final Map<String, double> strategyPnL = {};
     for (var trade in trades) {
-      final strategy = trade.strategy ?? 'Unknown';
+      final strategy = (trade.confluences?.isNotEmpty ?? false) ? trade.confluences!.join(', ') : 'Unknown';
       strategyPnL[strategy] = (strategyPnL[strategy] ?? 0) + trade.pnl;
     }
 

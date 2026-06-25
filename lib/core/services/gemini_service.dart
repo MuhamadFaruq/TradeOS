@@ -55,8 +55,9 @@ class GeminiService {
     final Map<String, List<double>> emotionPnLs = {};
     
     for (var t in trades) {
-      if (t.strategy != null && t.strategy!.isNotEmpty) {
-        strategies[t.strategy!] = (strategies[t.strategy!] ?? 0) + 1;
+      if (t.confluences != null && t.confluences!.isNotEmpty) {
+        final strategyStr = t.confluences!.join(', ');
+        strategies[strategyStr] = (strategies[strategyStr] ?? 0) + 1;
       }
       if (t.emotion != null && t.emotion!.isNotEmpty) {
         emotions[t.emotion!] = (emotions[t.emotion!] ?? 0) + 1;
@@ -208,8 +209,9 @@ Saat ini belum ada transaksi tercatat di database jurnal TradeOS Anda. Untuk mel
     final Map<String, int> brokenRules = {};
     
     for (var t in trades) {
-      if (t.strategy != null && t.strategy!.isNotEmpty) {
-        strategies[t.strategy!] = (strategies[t.strategy!] ?? 0) + 1;
+      if (t.confluences != null && t.confluences!.isNotEmpty) {
+        final strategyStr = t.confluences!.join(', ');
+        strategies[strategyStr] = (strategies[strategyStr] ?? 0) + 1;
       }
       if (t.emotion != null && t.emotion!.isNotEmpty) {
         emotions[t.emotion!] = (emotions[t.emotion!] ?? 0) + 1;

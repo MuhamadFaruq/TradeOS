@@ -36,7 +36,7 @@ class _TradeReplayScreenState extends ConsumerState<TradeReplayScreen> {
   }
 
   void _initWebViewController() {
-    final htmlContent = """
+    const htmlContent = """
 <!DOCTYPE html>
 <html>
 <head>
@@ -229,7 +229,7 @@ class _TradeReplayScreenState extends ConsumerState<TradeReplayScreen> {
           },
         ),
       )
-      ..loadHtmlString(htmlContent);
+      ..loadHtmlString(htmlContent, baseUrl: 'https://cdn.jsdelivr.net');
   }
 
   void _sendInitialData() {
@@ -428,7 +428,7 @@ class _TradeReplayScreenState extends ConsumerState<TradeReplayScreen> {
                                 Text(trade.pair, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                                 const SizedBox(height: 4),
                                 Text(
-                                  '${trade.direction.name.toUpperCase()} • ${trade.strategy ?? "No Strategy"}',
+                                  '${trade.assetClass == AssetClass.forex ? 'FOREX' : (trade.assetClass == AssetClass.cryptoFutures ? 'FUTURES' : 'SPOT')} • ${trade.direction.name.toUpperCase()} • ${trade.confluences?.join(', ') ?? "No Confluences"}',
                                   style: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
                                 ),
                               ],
@@ -550,7 +550,7 @@ class _TradeReplayScreenState extends ConsumerState<TradeReplayScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        '${_activeTrade!.pair} ${_activeTrade!.direction.name.toUpperCase()}',
+                        '[${_activeTrade!.assetClass == AssetClass.forex ? 'FOREX' : (_activeTrade!.assetClass == AssetClass.cryptoFutures ? 'FUTURES' : 'SPOT')}] ${_activeTrade!.pair} ${_activeTrade!.direction.name.toUpperCase()}',
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,

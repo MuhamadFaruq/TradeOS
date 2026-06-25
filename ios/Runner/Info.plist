@@ -66,5 +66,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>TradeOS memerlukan akses FaceID untuk mengamankan jurnal trading Anda.</string>
 </dict>
 </plist>

@@ -126,7 +126,7 @@ class CsvImportService {
           pnlPercentage: pnlPercentage,
           status: status,
           date: date,
-          strategy: strategy,
+          confluences: strategy != null ? [strategy] : null,
           notes: notes,
         );
 

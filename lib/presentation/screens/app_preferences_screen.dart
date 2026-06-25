@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/core_widgets.dart';
 import '../../data/providers/profile_provider.dart';
+import '../../data/providers/performance_provider.dart';
 
 class AppPreferencesScreen extends ConsumerWidget {
   const AppPreferencesScreen({super.key});
@@ -41,6 +42,15 @@ class AppPreferencesScreen extends ConsumerWidget {
                 profile.biometricsEnabled = v;
                 ref.read(profileProvider.notifier).updateProfile(profile);
               }
+            },
+          ),
+          const SizedBox(height: 16),
+          _buildToggle(
+            'Glassmorphism Blur',
+            'Enable realistic blur effects. Disable if you experience lag.',
+            ref.watch(performanceProvider),
+            (v) {
+              ref.read(performanceProvider.notifier).setBlurEnabled(v);
             },
           ),
           const SizedBox(height: 32),

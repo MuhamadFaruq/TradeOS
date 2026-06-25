@@ -19,6 +19,6 @@ void main() {
     expect(find.text('TradeOS'), findsOneWidget);
 
     // Settle the delayed navigation timer to prevent test failure from pending timers.
-    await tester.pumpAndSettle(const Duration(seconds: 3));
+    await tester.pumpAndSettle(const Duration(seconds: 6));
   });
 }

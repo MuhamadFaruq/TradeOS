@@ -4,6 +4,8 @@ import '../../data/models/trade.dart';
 import '../../data/models/user_profile.dart';
 import '../../data/models/economic_event.dart';
 
+import '../../data/models/portfolio.dart';
+
 class IsarService {
   static late Isar isar;
 
@@ -17,7 +19,7 @@ class IsarService {
     final dir = await getApplicationDocumentsDirectory();
 
     isar = await Isar.open(
-      [TradeSchema, UserProfileSchema, EconomicEventSchema],
+      [TradeSchema, UserProfileSchema, EconomicEventSchema, PortfolioSchema],
       directory: dir.path,
     );
   }

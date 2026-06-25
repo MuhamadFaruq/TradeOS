@@ -11,6 +11,7 @@ import 'dart:io' show File;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:file_picker/file_picker.dart';
 import '../../core/services/csv_import_service.dart';
+import 'exchange_sync_screen.dart';
 
 class JournalListScreen extends ConsumerStatefulWidget {
   const JournalListScreen({super.key});
@@ -22,6 +23,8 @@ class JournalListScreen extends ConsumerStatefulWidget {
 class _JournalListScreenState extends ConsumerState<JournalListScreen> {
   String _selectedFilter = 'All';
   final List<String> _filters = ['All', 'Won', 'Lost', 'Open'];
+  String _selectedAssetFilter = 'All';
+  final List<String> _assetFilters = ['All', 'Spot', 'Futures', 'Forex'];
   final _searchController = TextEditingController();
 
   @override
@@ -262,6 +265,16 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
       title: const Text('Trading Journal', style: TextStyle(fontWeight: FontWeight.bold)),
       actions: [
         IconButton(
+          icon: const Icon(Icons.sync_rounded, color: AppColors.primary),
+          tooltip: 'API Auto-Sync',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ExchangeSyncScreen()),
+            );
+          },
+        ),
+        IconButton(
           icon: const Icon(Icons.file_upload_rounded, color: AppColors.primary),
           tooltip: 'Import CSV',
           onPressed: () => _importCSV(context),
@@ -272,34 +285,68 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
             showModalBottomSheet(
               context: context,
               backgroundColor: AppColors.surface,
-              builder: (context) => Container(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Filter Options', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 20),
-                    const Text('Status', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      children: _filters.map((filter) {
-                        bool isSelected = _selectedFilter == filter;
-                        return ChoiceChip(
-                          label: Text(filter),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            if (selected) setState(() => _selectedFilter = filter);
-                            Navigator.pop(context);
-                          },
-                          backgroundColor: Colors.white.withValues(alpha: 0.05),
-                          selectedColor: AppColors.primary.withValues(alpha: 0.2),
-                        );
-                      }).toList(),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+              builder: (context) => StatefulBuilder(
+                builder: (context, setSheetState) {
+                  return Container(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Filter Options', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 20),
+                        const Text('Status', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          children: _filters.map((filter) {
+                            bool isSelected = _selectedFilter == filter;
+                            return ChoiceChip(
+                              label: Text(filter),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setSheetState(() => _selectedFilter = filter);
+                                  setState(() => _selectedFilter = filter);
+                                }
+                              },
+                              backgroundColor: Colors.white.withValues(alpha: 0.05),
+                              selectedColor: AppColors.primary.withValues(alpha: 0.2),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text('Asset Class', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          children: _assetFilters.map((filter) {
+                            bool isSelected = _selectedAssetFilter == filter;
+                            return ChoiceChip(
+                              label: Text(filter),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setSheetState(() => _selectedAssetFilter = filter);
+                                  setState(() => _selectedAssetFilter = filter);
+                                }
+                              },
+                              backgroundColor: Colors.white.withValues(alpha: 0.05),
+                              selectedColor: AppColors.primary.withValues(alpha: 0.2),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 32),
+                        GlowingButton(
+                          text: 'APPLY FILTERS',
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                }
               ),
             );
           },
@@ -366,10 +413,17 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
         if (_selectedFilter == 'Open' && trade.status != TradeStatus.open) return false;
       }
       
+      // Asset Class Filter
+      if (_selectedAssetFilter != 'All') {
+        if (_selectedAssetFilter == 'Spot' && trade.assetClass != AssetClass.cryptoSpot) return false;
+        if (_selectedAssetFilter == 'Futures' && trade.assetClass != AssetClass.cryptoFutures) return false;
+        if (_selectedAssetFilter == 'Forex' && trade.assetClass != AssetClass.forex) return false;
+      }
+      
       // Search Filter
       if (query.isNotEmpty) {
         final matchesPair = trade.pair.toLowerCase().contains(query);
-        final matchesStrategy = (trade.strategy ?? '').toLowerCase().contains(query);
+        final matchesStrategy = (trade.confluences?.join(', ') ?? '').toLowerCase().contains(query);
         if (!matchesPair && !matchesStrategy) return false;
       }
       
@@ -430,8 +484,8 @@ class _JournalListScreenState extends ConsumerState<JournalListScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${trade.direction.name.toUpperCase()} • ${trade.strategy ?? "No Strategy"}',
-                              style: const TextStyle(color: AppColors.textTertiary, fontSize: 12),
+                              '${trade.assetClass == AssetClass.forex ? 'FOREX' : (trade.assetClass == AssetClass.cryptoFutures ? 'FUTURES' : 'SPOT')} • ${trade.direction.name.toUpperCase()} • ${trade.confluences?.join(', ') ?? "No Confluences"}',
+                              style: const TextStyle(color: AppColors.textTertiary, fontSize: 11),
                             ),
                           ],
                         ),

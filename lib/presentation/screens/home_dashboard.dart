@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/core_widgets.dart';
+import '../../data/providers/performance_provider.dart';
 import '../../data/models/trade.dart';
 import '../../data/providers/trade_provider.dart';
 import '../../data/providers/profile_provider.dart';
+import '../../data/providers/portfolio_provider.dart';
+import '../../data/models/portfolio.dart';
 import 'analytics_dashboard.dart';
 import 'journal_list_screen.dart';
 import 'add_trade_screen.dart';
@@ -35,7 +38,7 @@ class _HomeContent extends ConsumerWidget {
     
     return CustomScrollView(
       slivers: [
-        _buildAppBar(context),
+        _buildAppBar(context, ref),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -64,7 +67,12 @@ class _HomeContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  Widget _buildAppBar(BuildContext context, WidgetRef ref) {
+    final portfolios = ref.watch(portfolioProvider);
+    final activeId = ref.watch(activePortfolioIdProvider);
+    // Determine active portfolio, if activeId is null but portfolios exist, fallback to first
+    final activePortfolio = portfolios.firstWhere((p) => p.id == activeId, orElse: () => portfolios.isNotEmpty ? portfolios.first : (Portfolio()..name='TradeOS'));
+
     return SliverAppBar(
       backgroundColor: AppColors.background,
       elevation: 0,
@@ -81,13 +89,39 @@ class _HomeContent extends ConsumerWidget {
             child: const Icon(Icons.auto_graph_rounded, color: AppColors.primary, size: 20),
           ),
           const SizedBox(width: 12),
-          Text(
-            'TradeOS',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
+          if (portfolios.isNotEmpty)
+            DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: activePortfolio.id,
+                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                ),
+                dropdownColor: AppColors.surface,
+                onChanged: (int? newValue) {
+                  if (newValue != null) {
+                    ref.read(activePortfolioIdProvider.notifier).state = newValue;
+                    // Trigger reload of trades
+                    ref.read(tradeProvider.notifier).refreshTrades();
+                  }
+                },
+                items: portfolios.map<DropdownMenuItem<int>>((Portfolio p) {
+                  return DropdownMenuItem<int>(
+                    value: p.id,
+                    child: Text(p.name),
+                  );
+                }).toList(),
+              ),
+            )
+          else
+            Text(
+              'TradeOS',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
+              ),
             ),
-          ),
         ],
       ),
       actions: [
@@ -285,7 +319,7 @@ class _HomeContent extends ConsumerWidget {
                     children: [
                       Text(trade.pair, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
                       Text(
-                        '${trade.direction.name.toUpperCase()} • ${trade.strategy ?? "No Strategy"}',
+                        '${trade.assetClass == AssetClass.forex ? 'FOREX' : (trade.assetClass == AssetClass.cryptoFutures ? 'FUTURES' : 'SPOT')} • ${trade.direction.name.toUpperCase()} • ${trade.confluences?.join(', ') ?? "No Confluences"}',
                         style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ],
@@ -461,32 +495,40 @@ class _HomeDashboardState extends ConsumerState<HomeDashboard> {
   }
 
   Widget _buildBottomNav() {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(
-          color: AppColors.background.withValues(alpha: 0.8),
-          child: BottomNavigationBar(
-            currentIndex: _selectedIndex,
-            onTap: (index) => setState(() => _selectedIndex = index),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: AppColors.primary,
-            unselectedItemColor: AppColors.textTertiary,
-            selectedLabelStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-            unselectedLabelStyle: const TextStyle(fontSize: 10),
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Home'),
-              BottomNavigationBarItem(icon: Icon(Icons.book_rounded), label: 'Journal'),
-              BottomNavigationBarItem(icon: Icon(Icons.insights_rounded), label: 'Analytics'),
-              BottomNavigationBarItem(icon: Icon(Icons.group_rounded), label: 'Community'),
-              BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
-            ],
-          ),
-        ),
+    final blurEnabled = ref.watch(performanceProvider);
+    
+    Widget navBar = Container(
+      color: AppColors.background.withValues(alpha: blurEnabled ? 0.8 : 0.95),
+      child: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: AppColors.textTertiary,
+        selectedLabelStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+        unselectedLabelStyle: const TextStyle(fontSize: 10),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view_rounded), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.book_rounded), label: 'Journal'),
+          BottomNavigationBarItem(icon: Icon(Icons.insights_rounded), label: 'Analytics'),
+          BottomNavigationBarItem(icon: Icon(Icons.group_rounded), label: 'Community'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
+        ],
       ),
     );
+
+    if (blurEnabled) {
+      return ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: navBar,
+        ),
+      );
+    }
+
+    return navBar;
   }
 }
 

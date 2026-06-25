@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
+import '../../data/models/user_profile.dart';
 import '../../data/providers/auth_provider.dart';
 import '../../data/providers/profile_provider.dart';
 import 'onboarding_screen.dart';
@@ -20,38 +21,48 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    await Future.delayed(const Duration(seconds: 2));
     
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        final authState = ref.read(authProvider);
-        final profile = ref.read(profileProvider);
-
-        Widget targetScreen;
-
-        if (authState.isLoggedIn) {
-          if (profile?.appPasscode != null && profile!.appPasscode!.isNotEmpty) {
-            targetScreen = const LockScreen();
-          } else {
-            targetScreen = const HomeDashboard();
-          }
-        } else {
-          if (authState.tradingType != null && authState.tradingType!.isNotEmpty) {
-            targetScreen = const AuthScreen();
-          } else {
-            targetScreen = const OnboardingScreen();
-          }
-        }
-
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => targetScreen,
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-          ),
-        );
+    if (mounted) {
+      UserProfile? profile = ref.read(profileProvider);
+      int retries = 0;
+      while (profile == null && retries < 10) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        profile = ref.read(profileProvider);
+        retries++;
       }
-    });
+      
+      final authState = ref.read(authProvider);
+      Widget targetScreen;
+
+      if (authState.isLoggedIn) {
+        if (profile?.appPasscode != null && profile!.appPasscode!.isNotEmpty) {
+          targetScreen = const LockScreen();
+        } else {
+          targetScreen = const HomeDashboard();
+        }
+      } else {
+        if (authState.tradingType != null && authState.tradingType!.isNotEmpty) {
+          targetScreen = const AuthScreen();
+        } else {
+          targetScreen = const OnboardingScreen();
+        }
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => targetScreen,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      );
+    }
   }
 
   @override

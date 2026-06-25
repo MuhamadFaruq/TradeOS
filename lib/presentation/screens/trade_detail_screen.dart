@@ -39,6 +39,10 @@ class TradeDetailScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   _buildPsychologyCard(),
                   const SizedBox(height: 32),
+                  _buildLabel('Execution Details'),
+                  const SizedBox(height: 12),
+                  _buildExecutionCard(),
+                  const SizedBox(height: 32),
                   _buildLabel('Strategy Details'),
                   const SizedBox(height: 12),
                   _buildStrategyCard(),
@@ -83,20 +87,41 @@ class TradeDetailScreen extends StatelessWidget {
   }
 
   Widget _buildHeader(Trade trade, Color color) {
+    String assetBadge = trade.assetClass.name.toUpperCase();
+    if (trade.assetClass == AssetClass.cryptoSpot) assetBadge = 'SPOT';
+    if (trade.assetClass == AssetClass.cryptoFutures) assetBadge = 'FUTURES';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: color.withValues(alpha: 0.5)),
-          ),
-          child: Text(
-            trade.status == TradeStatus.won ? 'WIN' : 'LOSS',
-            style: TextStyle(color: color, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-          ),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: color.withValues(alpha: 0.5)),
+              ),
+              child: Text(
+                trade.status == TradeStatus.won ? 'WIN' : 'LOSS',
+                style: TextStyle(color: color, fontWeight: FontWeight.bold, letterSpacing: 1.2, fontSize: 10),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
+              ),
+              child: Text(
+                assetBadge,
+                style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, letterSpacing: 1.2, fontSize: 10),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
         Row(
@@ -107,14 +132,14 @@ class TradeDetailScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
             ),
             Text(
-              '${trade.status == TradeStatus.won ? '+' : ''}\$${trade.pnl}',
+              '${trade.status == TradeStatus.won ? '+' : ''}\$${trade.pnl.toStringAsFixed(2)}',
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: color),
             ),
           ],
         ),
         const SizedBox(height: 8),
         Text(
-          '${trade.direction.name.toUpperCase()} • ${trade.strategy ?? "No Strategy"} • ${_formatDate(trade.date)}',
+          '${trade.direction.name.toUpperCase()} • ${trade.confluences?.join(', ') ?? "No Confluences"} • ${_formatDate(trade.date)}',
           style: const TextStyle(color: AppColors.textSecondary),
         ),
         if (trade.commission > 0 || trade.swap != 0) ...[
@@ -157,25 +182,84 @@ class TradeDetailScreen extends StatelessWidget {
   }
 
   Widget _buildStatsGrid() {
-    return Row(
+    final String plannedRrText = trade.plannedRRR != null 
+        ? '1:${trade.plannedRRR!.toStringAsFixed(1)}' 
+        : 'N/A';
+    final String actualRrText = trade.actualRRR != null 
+        ? '1:${trade.actualRRR!.toStringAsFixed(1)}' 
+        : 'N/A';
+        
+    Color actualRrColor = AppColors.textPrimary;
+    if (trade.plannedRRR != null && trade.actualRRR != null) {
+       actualRrColor = trade.actualRRR! >= trade.plannedRRR! ? AppColors.success : AppColors.danger;
+    }
+        
+    final String durationText = trade.durationMinutes != null 
+        ? '${trade.durationMinutes}m' 
+        : 'N/A';
+        
+    final String roiText = '${trade.pnlPercentage >= 0 ? '+' : ''}${trade.pnlPercentage.toStringAsFixed(2)}%';
+
+    return Column(
       children: [
-        Expanded(child: _buildStatBox('RR Ratio', '1:3.2', AppColors.primary)),
-        const SizedBox(width: 16),
-        Expanded(child: _buildStatBox('Duration', '4h 22m', AppColors.textPrimary)),
-        const SizedBox(width: 16),
-        Expanded(child: _buildStatBox('ROI', '+12.4%', AppColors.success)),
+        Row(
+          children: [
+            Expanded(child: _buildStatBox('Planned RR', plannedRrText, AppColors.primary)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildStatBox('Actual RR', actualRrText, actualRrColor)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildStatBox('Duration', durationText, AppColors.textPrimary)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildStatBox('ROI', roiText, trade.pnlPercentage >= 0 ? AppColors.success : AppColors.danger)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (trade.assetClass == AssetClass.forex)
+          Row(
+            children: [
+              Expanded(child: _buildStatBox('Lot Size', '${trade.lotSize ?? "N/A"}', Colors.white)),
+              const SizedBox(width: 12),
+              Expanded(child: _buildStatBox('Pips', '${trade.pips ?? "N/A"}', Colors.white)),
+            ],
+          )
+        else if (trade.assetClass == AssetClass.cryptoFutures)
+          Row(
+            children: [
+              Expanded(child: _buildStatBox('Leverage', '${trade.leverage.toStringAsFixed(0)}x', Colors.white)),
+              const SizedBox(width: 12),
+              Expanded(child: _buildStatBox('Liq Price', trade.liquidationPrice != null ? '\$${trade.liquidationPrice!.toStringAsFixed(2)}' : 'N/A', AppColors.danger)),
+              const SizedBox(width: 12),
+              Expanded(child: _buildStatBox('Funding Fee', trade.fundingFee != null ? '\$${trade.fundingFee!.toStringAsFixed(2)}' : 'N/A', Colors.white)),
+            ],
+          )
+        else
+          Row(
+            children: [
+              Expanded(child: _buildStatBox('Total Investment', '\$${trade.amount.toStringAsFixed(2)}', Colors.white)),
+            ],
+          ),
+        if (trade.mae != null || trade.mfe != null) ...[
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _buildStatBox('Max Adverse (MAE)', trade.mae != null ? '\$${trade.mae!.toStringAsFixed(2)}' : 'N/A', AppColors.danger)),
+              const SizedBox(width: 12),
+              Expanded(child: _buildStatBox('Max Favorable (MFE)', trade.mfe != null ? '\$${trade.mfe!.toStringAsFixed(2)}' : 'N/A', AppColors.success)),
+            ],
+          ),
+        ],
       ],
     );
   }
 
   Widget _buildStatBox(String label, String value, Color color) {
     return GlassCard(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
       child: Column(
         children: [
-          Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 12)),
+          Text(label, style: const TextStyle(color: AppColors.textTertiary, fontSize: 12), textAlign: TextAlign.center),
           const SizedBox(height: 8),
-          Text(value, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 18)),
+          Text(value, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 16), textAlign: TextAlign.center),
         ],
       ),
     );
@@ -253,21 +337,83 @@ class TradeDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStrategyCard() {
-    return const GlassCard(
+  Widget _buildExecutionCard() {
+    return GlassCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Confluences', style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(height: 12),
+          if (trade.expectedEntryPrice != null) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Expected Entry', style: TextStyle(color: AppColors.textTertiary)),
+                Text('\$${trade.expectedEntryPrice}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Actual Entry', style: TextStyle(color: AppColors.textTertiary)),
+                Text('\$${trade.entryPrice}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Slippage', style: TextStyle(color: AppColors.textTertiary)),
+                Text(
+                  '${trade.slippage != null ? trade.slippage!.toStringAsFixed(3) : 0}%', 
+                  style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.bold)
+                ),
+              ],
+            ),
+            const Divider(color: Colors.white10, height: 24),
+          ],
+          const Text('Exits (Scaling Out)', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          if (trade.partialExits == null || trade.partialExits!.isEmpty)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Full Exit At', style: TextStyle(color: AppColors.textTertiary)),
+                Text(trade.exitPrice != null ? '\$${trade.exitPrice}' : 'Open', style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            )
+          else
+            ...trade.partialExits!.asMap().entries.map((e) {
+              int index = e.key;
+              var pe = e.value;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('TP ${index + 1} (Amt: ${pe.amount ?? '-'})', style: const TextStyle(color: AppColors.textTertiary)),
+                    Text('\$${pe.exitPrice}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.success)),
+                  ],
+                ),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStrategyCard() {
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Confluences', style: TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: [
-              _Tag('H4 Structure'),
-              _Tag('VWAP Bounce'),
-              _Tag('Volume Spike'),
-            ],
+            children: (trade.confluences == null || trade.confluences!.isEmpty) 
+                ? [const _Tag('No specific confluences recorded')]
+                : trade.confluences!.map((c) => _Tag(c.trim())).toList(),
           ),
         ],
       ),

@@ -17,165 +17,227 @@ const TradeSchema = CollectionSchema(
   name: r'Trade',
   id: 4394246318675225554,
   properties: {
-    r'afterExitScreenshots': PropertySchema(
+    r'actualRRR': PropertySchema(
       id: 0,
+      name: r'actualRRR',
+      type: IsarType.double,
+    ),
+    r'afterExitScreenshots': PropertySchema(
+      id: 1,
       name: r'afterExitScreenshots',
       type: IsarType.stringList,
     ),
     r'amount': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'amount',
       type: IsarType.double,
     ),
+    r'assetClass': PropertySchema(
+      id: 3,
+      name: r'assetClass',
+      type: IsarType.byte,
+      enumMap: _TradeassetClassEnumValueMap,
+    ),
     r'beforeEntryScreenshots': PropertySchema(
-      id: 2,
+      id: 4,
       name: r'beforeEntryScreenshots',
       type: IsarType.stringList,
     ),
     r'brokenRule': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'brokenRule',
       type: IsarType.string,
     ),
     r'commission': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'commission',
       type: IsarType.double,
     ),
     r'confidence': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'confidence',
       type: IsarType.long,
     ),
+    r'confluences': PropertySchema(
+      id: 8,
+      name: r'confluences',
+      type: IsarType.stringList,
+    ),
     r'cvd': PropertySchema(
-      id: 6,
+      id: 9,
       name: r'cvd',
       type: IsarType.double,
     ),
     r'date': PropertySchema(
-      id: 7,
+      id: 10,
       name: r'date',
       type: IsarType.dateTime,
     ),
     r'direction': PropertySchema(
-      id: 8,
+      id: 11,
       name: r'direction',
       type: IsarType.byte,
       enumMap: _TradedirectionEnumValueMap,
     ),
     r'durationHours': PropertySchema(
-      id: 9,
+      id: 12,
       name: r'durationHours',
       type: IsarType.long,
     ),
     r'durationMinutes': PropertySchema(
-      id: 10,
+      id: 13,
       name: r'durationMinutes',
       type: IsarType.long,
     ),
     r'emotion': PropertySchema(
-      id: 11,
+      id: 14,
       name: r'emotion',
       type: IsarType.string,
     ),
     r'entryPrice': PropertySchema(
-      id: 12,
+      id: 15,
       name: r'entryPrice',
       type: IsarType.double,
     ),
     r'exitPrice': PropertySchema(
-      id: 13,
+      id: 16,
       name: r'exitPrice',
       type: IsarType.double,
     ),
+    r'expectedEntryPrice': PropertySchema(
+      id: 17,
+      name: r'expectedEntryPrice',
+      type: IsarType.double,
+    ),
+    r'fundingFee': PropertySchema(
+      id: 18,
+      name: r'fundingFee',
+      type: IsarType.double,
+    ),
     r'highPrice': PropertySchema(
-      id: 14,
+      id: 19,
       name: r'highPrice',
       type: IsarType.double,
     ),
     r'isLong': PropertySchema(
-      id: 15,
+      id: 20,
       name: r'isLong',
       type: IsarType.bool,
     ),
     r'leverage': PropertySchema(
-      id: 16,
+      id: 21,
       name: r'leverage',
       type: IsarType.double,
     ),
+    r'liquidationPrice': PropertySchema(
+      id: 22,
+      name: r'liquidationPrice',
+      type: IsarType.double,
+    ),
+    r'lotSize': PropertySchema(
+      id: 23,
+      name: r'lotSize',
+      type: IsarType.double,
+    ),
     r'lowPrice': PropertySchema(
-      id: 17,
+      id: 24,
       name: r'lowPrice',
       type: IsarType.double,
     ),
+    r'mae': PropertySchema(
+      id: 25,
+      name: r'mae',
+      type: IsarType.double,
+    ),
+    r'mfe': PropertySchema(
+      id: 26,
+      name: r'mfe',
+      type: IsarType.double,
+    ),
     r'notes': PropertySchema(
-      id: 18,
+      id: 27,
       name: r'notes',
       type: IsarType.string,
     ),
     r'pair': PropertySchema(
-      id: 19,
+      id: 28,
       name: r'pair',
       type: IsarType.string,
     ),
+    r'partialExits': PropertySchema(
+      id: 29,
+      name: r'partialExits',
+      type: IsarType.objectList,
+      target: r'PartialExit',
+    ),
+    r'pips': PropertySchema(
+      id: 30,
+      name: r'pips',
+      type: IsarType.double,
+    ),
+    r'plannedRRR': PropertySchema(
+      id: 31,
+      name: r'plannedRRR',
+      type: IsarType.double,
+    ),
     r'pnl': PropertySchema(
-      id: 20,
+      id: 32,
       name: r'pnl',
       type: IsarType.double,
     ),
     r'pnlPercentage': PropertySchema(
-      id: 21,
+      id: 33,
       name: r'pnlPercentage',
       type: IsarType.double,
     ),
-    r'riskRewardRatio': PropertySchema(
-      id: 22,
-      name: r'riskRewardRatio',
-      type: IsarType.double,
+    r'portfolioId': PropertySchema(
+      id: 34,
+      name: r'portfolioId',
+      type: IsarType.long,
     ),
     r'session': PropertySchema(
-      id: 23,
+      id: 35,
       name: r'session',
       type: IsarType.string,
     ),
+    r'slippage': PropertySchema(
+      id: 36,
+      name: r'slippage',
+      type: IsarType.double,
+    ),
     r'status': PropertySchema(
-      id: 24,
+      id: 37,
       name: r'status',
       type: IsarType.byte,
       enumMap: _TradestatusEnumValueMap,
     ),
     r'stopLossPrice': PropertySchema(
-      id: 25,
+      id: 38,
       name: r'stopLossPrice',
       type: IsarType.double,
     ),
-    r'strategy': PropertySchema(
-      id: 26,
-      name: r'strategy',
-      type: IsarType.string,
-    ),
     r'swap': PropertySchema(
-      id: 27,
+      id: 39,
       name: r'swap',
       type: IsarType.double,
     ),
     r'takeProfitPrice': PropertySchema(
-      id: 28,
+      id: 40,
       name: r'takeProfitPrice',
       type: IsarType.double,
     ),
     r'totalVolume': PropertySchema(
-      id: 29,
+      id: 41,
       name: r'totalVolume',
       type: IsarType.double,
     ),
     r'volumeImbalance': PropertySchema(
-      id: 30,
+      id: 42,
       name: r'volumeImbalance',
       type: IsarType.double,
     ),
     r'wasRuleBroken': PropertySchema(
-      id: 31,
+      id: 43,
       name: r'wasRuleBroken',
       type: IsarType.bool,
     )
@@ -214,7 +276,7 @@ const TradeSchema = CollectionSchema(
     )
   },
   links: {},
-  embeddedSchemas: {},
+  embeddedSchemas: {r'PartialExit': PartialExitSchema},
   getId: _tradeGetId,
   getLinks: _tradeGetLinks,
   attach: _tradeAttach,
@@ -258,6 +320,18 @@ int _tradeEstimateSize(
     }
   }
   {
+    final list = object.confluences;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount += value.length * 3;
+        }
+      }
+    }
+  }
+  {
     final value = object.emotion;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
@@ -271,13 +345,21 @@ int _tradeEstimateSize(
   }
   bytesCount += 3 + object.pair.length * 3;
   {
-    final value = object.session;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
+    final list = object.partialExits;
+    if (list != null) {
+      bytesCount += 3 + list.length * 3;
+      {
+        final offsets = allOffsets[PartialExit]!;
+        for (var i = 0; i < list.length; i++) {
+          final value = list[i];
+          bytesCount +=
+              PartialExitSchema.estimateSize(value, offsets, allOffsets);
+        }
+      }
     }
   }
   {
-    final value = object.strategy;
+    final value = object.session;
     if (value != null) {
       bytesCount += 3 + value.length * 3;
     }
@@ -291,38 +373,55 @@ void _tradeSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeStringList(offsets[0], object.afterExitScreenshots);
-  writer.writeDouble(offsets[1], object.amount);
-  writer.writeStringList(offsets[2], object.beforeEntryScreenshots);
-  writer.writeString(offsets[3], object.brokenRule);
-  writer.writeDouble(offsets[4], object.commission);
-  writer.writeLong(offsets[5], object.confidence);
-  writer.writeDouble(offsets[6], object.cvd);
-  writer.writeDateTime(offsets[7], object.date);
-  writer.writeByte(offsets[8], object.direction.index);
-  writer.writeLong(offsets[9], object.durationHours);
-  writer.writeLong(offsets[10], object.durationMinutes);
-  writer.writeString(offsets[11], object.emotion);
-  writer.writeDouble(offsets[12], object.entryPrice);
-  writer.writeDouble(offsets[13], object.exitPrice);
-  writer.writeDouble(offsets[14], object.highPrice);
-  writer.writeBool(offsets[15], object.isLong);
-  writer.writeDouble(offsets[16], object.leverage);
-  writer.writeDouble(offsets[17], object.lowPrice);
-  writer.writeString(offsets[18], object.notes);
-  writer.writeString(offsets[19], object.pair);
-  writer.writeDouble(offsets[20], object.pnl);
-  writer.writeDouble(offsets[21], object.pnlPercentage);
-  writer.writeDouble(offsets[22], object.riskRewardRatio);
-  writer.writeString(offsets[23], object.session);
-  writer.writeByte(offsets[24], object.status.index);
-  writer.writeDouble(offsets[25], object.stopLossPrice);
-  writer.writeString(offsets[26], object.strategy);
-  writer.writeDouble(offsets[27], object.swap);
-  writer.writeDouble(offsets[28], object.takeProfitPrice);
-  writer.writeDouble(offsets[29], object.totalVolume);
-  writer.writeDouble(offsets[30], object.volumeImbalance);
-  writer.writeBool(offsets[31], object.wasRuleBroken);
+  writer.writeDouble(offsets[0], object.actualRRR);
+  writer.writeStringList(offsets[1], object.afterExitScreenshots);
+  writer.writeDouble(offsets[2], object.amount);
+  writer.writeByte(offsets[3], object.assetClass.index);
+  writer.writeStringList(offsets[4], object.beforeEntryScreenshots);
+  writer.writeString(offsets[5], object.brokenRule);
+  writer.writeDouble(offsets[6], object.commission);
+  writer.writeLong(offsets[7], object.confidence);
+  writer.writeStringList(offsets[8], object.confluences);
+  writer.writeDouble(offsets[9], object.cvd);
+  writer.writeDateTime(offsets[10], object.date);
+  writer.writeByte(offsets[11], object.direction.index);
+  writer.writeLong(offsets[12], object.durationHours);
+  writer.writeLong(offsets[13], object.durationMinutes);
+  writer.writeString(offsets[14], object.emotion);
+  writer.writeDouble(offsets[15], object.entryPrice);
+  writer.writeDouble(offsets[16], object.exitPrice);
+  writer.writeDouble(offsets[17], object.expectedEntryPrice);
+  writer.writeDouble(offsets[18], object.fundingFee);
+  writer.writeDouble(offsets[19], object.highPrice);
+  writer.writeBool(offsets[20], object.isLong);
+  writer.writeDouble(offsets[21], object.leverage);
+  writer.writeDouble(offsets[22], object.liquidationPrice);
+  writer.writeDouble(offsets[23], object.lotSize);
+  writer.writeDouble(offsets[24], object.lowPrice);
+  writer.writeDouble(offsets[25], object.mae);
+  writer.writeDouble(offsets[26], object.mfe);
+  writer.writeString(offsets[27], object.notes);
+  writer.writeString(offsets[28], object.pair);
+  writer.writeObjectList<PartialExit>(
+    offsets[29],
+    allOffsets,
+    PartialExitSchema.serialize,
+    object.partialExits,
+  );
+  writer.writeDouble(offsets[30], object.pips);
+  writer.writeDouble(offsets[31], object.plannedRRR);
+  writer.writeDouble(offsets[32], object.pnl);
+  writer.writeDouble(offsets[33], object.pnlPercentage);
+  writer.writeLong(offsets[34], object.portfolioId);
+  writer.writeString(offsets[35], object.session);
+  writer.writeDouble(offsets[36], object.slippage);
+  writer.writeByte(offsets[37], object.status.index);
+  writer.writeDouble(offsets[38], object.stopLossPrice);
+  writer.writeDouble(offsets[39], object.swap);
+  writer.writeDouble(offsets[40], object.takeProfitPrice);
+  writer.writeDouble(offsets[41], object.totalVolume);
+  writer.writeDouble(offsets[42], object.volumeImbalance);
+  writer.writeBool(offsets[43], object.wasRuleBroken);
 }
 
 Trade _tradeDeserialize(
@@ -332,42 +431,61 @@ Trade _tradeDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Trade();
-  object.afterExitScreenshots = reader.readStringList(offsets[0]);
-  object.amount = reader.readDouble(offsets[1]);
-  object.beforeEntryScreenshots = reader.readStringList(offsets[2]);
-  object.brokenRule = reader.readStringOrNull(offsets[3]);
-  object.commission = reader.readDouble(offsets[4]);
-  object.confidence = reader.readLongOrNull(offsets[5]);
-  object.cvd = reader.readDoubleOrNull(offsets[6]);
-  object.date = reader.readDateTime(offsets[7]);
+  object.actualRRR = reader.readDoubleOrNull(offsets[0]);
+  object.afterExitScreenshots = reader.readStringList(offsets[1]);
+  object.amount = reader.readDouble(offsets[2]);
+  object.assetClass =
+      _TradeassetClassValueEnumMap[reader.readByteOrNull(offsets[3])] ??
+          AssetClass.forex;
+  object.beforeEntryScreenshots = reader.readStringList(offsets[4]);
+  object.brokenRule = reader.readStringOrNull(offsets[5]);
+  object.commission = reader.readDouble(offsets[6]);
+  object.confidence = reader.readLongOrNull(offsets[7]);
+  object.confluences = reader.readStringList(offsets[8]);
+  object.cvd = reader.readDoubleOrNull(offsets[9]);
+  object.date = reader.readDateTime(offsets[10]);
   object.direction =
-      _TradedirectionValueEnumMap[reader.readByteOrNull(offsets[8])] ??
+      _TradedirectionValueEnumMap[reader.readByteOrNull(offsets[11])] ??
           TradeDirection.long;
-  object.durationHours = reader.readLongOrNull(offsets[9]);
-  object.durationMinutes = reader.readLongOrNull(offsets[10]);
-  object.emotion = reader.readStringOrNull(offsets[11]);
-  object.entryPrice = reader.readDouble(offsets[12]);
-  object.exitPrice = reader.readDoubleOrNull(offsets[13]);
-  object.highPrice = reader.readDoubleOrNull(offsets[14]);
+  object.durationHours = reader.readLongOrNull(offsets[12]);
+  object.durationMinutes = reader.readLongOrNull(offsets[13]);
+  object.emotion = reader.readStringOrNull(offsets[14]);
+  object.entryPrice = reader.readDouble(offsets[15]);
+  object.exitPrice = reader.readDoubleOrNull(offsets[16]);
+  object.expectedEntryPrice = reader.readDoubleOrNull(offsets[17]);
+  object.fundingFee = reader.readDoubleOrNull(offsets[18]);
+  object.highPrice = reader.readDoubleOrNull(offsets[19]);
   object.id = id;
-  object.leverage = reader.readDouble(offsets[16]);
-  object.lowPrice = reader.readDoubleOrNull(offsets[17]);
-  object.notes = reader.readStringOrNull(offsets[18]);
-  object.pair = reader.readString(offsets[19]);
-  object.pnl = reader.readDouble(offsets[20]);
-  object.pnlPercentage = reader.readDouble(offsets[21]);
-  object.riskRewardRatio = reader.readDoubleOrNull(offsets[22]);
-  object.session = reader.readStringOrNull(offsets[23]);
+  object.leverage = reader.readDouble(offsets[21]);
+  object.liquidationPrice = reader.readDoubleOrNull(offsets[22]);
+  object.lotSize = reader.readDoubleOrNull(offsets[23]);
+  object.lowPrice = reader.readDoubleOrNull(offsets[24]);
+  object.mae = reader.readDoubleOrNull(offsets[25]);
+  object.mfe = reader.readDoubleOrNull(offsets[26]);
+  object.notes = reader.readStringOrNull(offsets[27]);
+  object.pair = reader.readString(offsets[28]);
+  object.partialExits = reader.readObjectList<PartialExit>(
+    offsets[29],
+    PartialExitSchema.deserialize,
+    allOffsets,
+    PartialExit(),
+  );
+  object.pips = reader.readDoubleOrNull(offsets[30]);
+  object.plannedRRR = reader.readDoubleOrNull(offsets[31]);
+  object.pnl = reader.readDouble(offsets[32]);
+  object.pnlPercentage = reader.readDouble(offsets[33]);
+  object.portfolioId = reader.readLongOrNull(offsets[34]);
+  object.session = reader.readStringOrNull(offsets[35]);
+  object.slippage = reader.readDoubleOrNull(offsets[36]);
   object.status =
-      _TradestatusValueEnumMap[reader.readByteOrNull(offsets[24])] ??
+      _TradestatusValueEnumMap[reader.readByteOrNull(offsets[37])] ??
           TradeStatus.won;
-  object.stopLossPrice = reader.readDoubleOrNull(offsets[25]);
-  object.strategy = reader.readStringOrNull(offsets[26]);
-  object.swap = reader.readDouble(offsets[27]);
-  object.takeProfitPrice = reader.readDoubleOrNull(offsets[28]);
-  object.totalVolume = reader.readDoubleOrNull(offsets[29]);
-  object.volumeImbalance = reader.readDoubleOrNull(offsets[30]);
-  object.wasRuleBroken = reader.readBool(offsets[31]);
+  object.stopLossPrice = reader.readDoubleOrNull(offsets[38]);
+  object.swap = reader.readDouble(offsets[39]);
+  object.takeProfitPrice = reader.readDoubleOrNull(offsets[40]);
+  object.totalVolume = reader.readDoubleOrNull(offsets[41]);
+  object.volumeImbalance = reader.readDoubleOrNull(offsets[42]);
+  object.wasRuleBroken = reader.readBool(offsets[43]);
   return object;
 }
 
@@ -379,76 +497,116 @@ P _tradeDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringList(offset)) as P;
-    case 1:
-      return (reader.readDouble(offset)) as P;
-    case 2:
-      return (reader.readStringList(offset)) as P;
-    case 3:
-      return (reader.readStringOrNull(offset)) as P;
-    case 4:
-      return (reader.readDouble(offset)) as P;
-    case 5:
-      return (reader.readLongOrNull(offset)) as P;
-    case 6:
       return (reader.readDoubleOrNull(offset)) as P;
+    case 1:
+      return (reader.readStringList(offset)) as P;
+    case 2:
+      return (reader.readDouble(offset)) as P;
+    case 3:
+      return (_TradeassetClassValueEnumMap[reader.readByteOrNull(offset)] ??
+          AssetClass.forex) as P;
+    case 4:
+      return (reader.readStringList(offset)) as P;
+    case 5:
+      return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readDouble(offset)) as P;
     case 7:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 8:
+      return (reader.readStringList(offset)) as P;
+    case 9:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 10:
+      return (reader.readDateTime(offset)) as P;
+    case 11:
       return (_TradedirectionValueEnumMap[reader.readByteOrNull(offset)] ??
           TradeDirection.long) as P;
-    case 9:
-      return (reader.readLongOrNull(offset)) as P;
-    case 10:
-      return (reader.readLongOrNull(offset)) as P;
-    case 11:
-      return (reader.readStringOrNull(offset)) as P;
     case 12:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 13:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 14:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 15:
-      return (reader.readBool(offset)) as P;
-    case 16:
       return (reader.readDouble(offset)) as P;
+    case 16:
+      return (reader.readDoubleOrNull(offset)) as P;
     case 17:
       return (reader.readDoubleOrNull(offset)) as P;
     case 18:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 19:
-      return (reader.readString(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 20:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 21:
       return (reader.readDouble(offset)) as P;
     case 22:
       return (reader.readDoubleOrNull(offset)) as P;
     case 23:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 24:
-      return (_TradestatusValueEnumMap[reader.readByteOrNull(offset)] ??
-          TradeStatus.won) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 25:
       return (reader.readDoubleOrNull(offset)) as P;
     case 26:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 27:
-      return (reader.readDouble(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 28:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 29:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readObjectList<PartialExit>(
+        offset,
+        PartialExitSchema.deserialize,
+        allOffsets,
+        PartialExit(),
+      )) as P;
     case 30:
       return (reader.readDoubleOrNull(offset)) as P;
     case 31:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 32:
+      return (reader.readDouble(offset)) as P;
+    case 33:
+      return (reader.readDouble(offset)) as P;
+    case 34:
+      return (reader.readLongOrNull(offset)) as P;
+    case 35:
+      return (reader.readStringOrNull(offset)) as P;
+    case 36:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 37:
+      return (_TradestatusValueEnumMap[reader.readByteOrNull(offset)] ??
+          TradeStatus.won) as P;
+    case 38:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 39:
+      return (reader.readDouble(offset)) as P;
+    case 40:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 41:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 42:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 43:
       return (reader.readBool(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
 }
 
+const _TradeassetClassEnumValueMap = {
+  'forex': 0,
+  'cryptoSpot': 1,
+  'cryptoFutures': 2,
+};
+const _TradeassetClassValueEnumMap = {
+  0: AssetClass.forex,
+  1: AssetClass.cryptoSpot,
+  2: AssetClass.cryptoFutures,
+};
 const _TradedirectionEnumValueMap = {
   'long': 0,
   'short': 1,
@@ -798,6 +956,84 @@ extension TradeQueryWhere on QueryBuilder<Trade, Trade, QWhereClause> {
 }
 
 extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> actualRRRIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'actualRRR',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> actualRRRIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'actualRRR',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> actualRRREqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'actualRRR',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> actualRRRGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'actualRRR',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> actualRRRLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'actualRRR',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> actualRRRBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'actualRRR',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterFilterCondition>
       afterExitScreenshotsIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1101,6 +1337,59 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> assetClassEqualTo(
+      AssetClass value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'assetClass',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> assetClassGreaterThan(
+    AssetClass value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'assetClass',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> assetClassLessThan(
+    AssetClass value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'assetClass',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> assetClassBetween(
+    AssetClass lower,
+    AssetClass upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'assetClass',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -1624,6 +1913,241 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
         upper: upper,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'confluences',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'confluences',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'confluences',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition>
+      confluencesElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'confluences',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'confluences',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'confluences',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition>
+      confluencesElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'confluences',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'confluences',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesElementContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'confluences',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesElementMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'confluences',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition>
+      confluencesElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'confluences',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition>
+      confluencesElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'confluences',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'confluences',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'confluences',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'confluences',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'confluences',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition>
+      confluencesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'confluences',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> confluencesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'confluences',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 
@@ -2235,6 +2759,164 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> expectedEntryPriceIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'expectedEntryPrice',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition>
+      expectedEntryPriceIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'expectedEntryPrice',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> expectedEntryPriceEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'expectedEntryPrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition>
+      expectedEntryPriceGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'expectedEntryPrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> expectedEntryPriceLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'expectedEntryPrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> expectedEntryPriceBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'expectedEntryPrice',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> fundingFeeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'fundingFee',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> fundingFeeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'fundingFee',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> fundingFeeEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'fundingFee',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> fundingFeeGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'fundingFee',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> fundingFeeLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'fundingFee',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> fundingFeeBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'fundingFee',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterFilterCondition> highPriceIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -2436,6 +3118,163 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> liquidationPriceIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'liquidationPrice',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition>
+      liquidationPriceIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'liquidationPrice',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> liquidationPriceEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'liquidationPrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> liquidationPriceGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'liquidationPrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> liquidationPriceLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'liquidationPrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> liquidationPriceBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'liquidationPrice',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> lotSizeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'lotSize',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> lotSizeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'lotSize',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> lotSizeEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'lotSize',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> lotSizeGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'lotSize',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> lotSizeLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'lotSize',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> lotSizeBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'lotSize',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterFilterCondition> lowPriceIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -2505,6 +3344,162 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
         property: r'lowPrice',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> maeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'mae',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> maeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'mae',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> maeEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'mae',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> maeGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'mae',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> maeLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'mae',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> maeBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'mae',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> mfeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'mfe',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> mfeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'mfe',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> mfeEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'mfe',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> mfeGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'mfe',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> mfeLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'mfe',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> mfeBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'mfe',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
@@ -2786,6 +3781,263 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> partialExitsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'partialExits',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> partialExitsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'partialExits',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> partialExitsLengthEqualTo(
+      int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'partialExits',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> partialExitsIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'partialExits',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> partialExitsIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'partialExits',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> partialExitsLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'partialExits',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition>
+      partialExitsLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'partialExits',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> partialExitsLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'partialExits',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> pipsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'pips',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> pipsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'pips',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> pipsEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'pips',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> pipsGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'pips',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> pipsLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'pips',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> pipsBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'pips',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> plannedRRRIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'plannedRRR',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> plannedRRRIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'plannedRRR',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> plannedRRREqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'plannedRRR',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> plannedRRRGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'plannedRRR',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> plannedRRRLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'plannedRRR',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> plannedRRRBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'plannedRRR',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterFilterCondition> pnlEqualTo(
     double value, {
     double epsilon = Query.epsilon,
@@ -2910,80 +4162,71 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> riskRewardRatioIsNull() {
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> portfolioIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'riskRewardRatio',
+        property: r'portfolioId',
       ));
     });
   }
 
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> riskRewardRatioIsNotNull() {
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> portfolioIdIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'riskRewardRatio',
+        property: r'portfolioId',
       ));
     });
   }
 
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> riskRewardRatioEqualTo(
-    double? value, {
-    double epsilon = Query.epsilon,
-  }) {
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> portfolioIdEqualTo(
+      int? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'riskRewardRatio',
+        property: r'portfolioId',
         value: value,
-        epsilon: epsilon,
       ));
     });
   }
 
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> riskRewardRatioGreaterThan(
-    double? value, {
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> portfolioIdGreaterThan(
+    int? value, {
     bool include = false,
-    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
-        property: r'riskRewardRatio',
+        property: r'portfolioId',
         value: value,
-        epsilon: epsilon,
       ));
     });
   }
 
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> riskRewardRatioLessThan(
-    double? value, {
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> portfolioIdLessThan(
+    int? value, {
     bool include = false,
-    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
-        property: r'riskRewardRatio',
+        property: r'portfolioId',
         value: value,
-        epsilon: epsilon,
       ));
     });
   }
 
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> riskRewardRatioBetween(
-    double? lower,
-    double? upper, {
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> portfolioIdBetween(
+    int? lower,
+    int? upper, {
     bool includeLower = true,
     bool includeUpper = true,
-    double epsilon = Query.epsilon,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
-        property: r'riskRewardRatio',
+        property: r'portfolioId',
         lower: lower,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
-        epsilon: epsilon,
       ));
     });
   }
@@ -3134,6 +4377,84 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> slippageIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'slippage',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> slippageIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'slippage',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> slippageEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'slippage',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> slippageGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'slippage',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> slippageLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'slippage',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> slippageBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'slippage',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterFilterCondition> statusEqualTo(
       TradeStatus value) {
     return QueryBuilder.apply(this, (query) {
@@ -3261,152 +4582,6 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
         upper: upper,
         includeUpper: includeUpper,
         epsilon: epsilon,
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'strategy',
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'strategy',
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyEqualTo(
-    String? value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'strategy',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyGreaterThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'strategy',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyLessThan(
-    String? value, {
-    bool include = false,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'strategy',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyBetween(
-    String? lower,
-    String? upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'strategy',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyStartsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.startsWith(
-        property: r'strategy',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyEndsWith(
-    String value, {
-    bool caseSensitive = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.endsWith(
-        property: r'strategy',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyContains(
-      String value,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.contains(
-        property: r'strategy',
-        value: value,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyMatches(
-      String pattern,
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.matches(
-        property: r'strategy',
-        wildcard: pattern,
-        caseSensitive: caseSensitive,
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyIsEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'strategy',
-        value: '',
-      ));
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterFilterCondition> strategyIsNotEmpty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        property: r'strategy',
-        value: '',
       ));
     });
   }
@@ -3718,11 +4893,30 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
   }
 }
 
-extension TradeQueryObject on QueryBuilder<Trade, Trade, QFilterCondition> {}
+extension TradeQueryObject on QueryBuilder<Trade, Trade, QFilterCondition> {
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> partialExitsElement(
+      FilterQuery<PartialExit> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'partialExits');
+    });
+  }
+}
 
 extension TradeQueryLinks on QueryBuilder<Trade, Trade, QFilterCondition> {}
 
 extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByActualRRR() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'actualRRR', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByActualRRRDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'actualRRR', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'amount', Sort.asc);
@@ -3732,6 +4926,18 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByAmountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'amount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByAssetClass() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'assetClass', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByAssetClassDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'assetClass', Sort.desc);
     });
   }
 
@@ -3867,6 +5073,30 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByExpectedEntryPrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'expectedEntryPrice', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByExpectedEntryPriceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'expectedEntryPrice', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByFundingFee() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fundingFee', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByFundingFeeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fundingFee', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByHighPrice() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'highPrice', Sort.asc);
@@ -3903,6 +5133,30 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByLiquidationPrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'liquidationPrice', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByLiquidationPriceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'liquidationPrice', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByLotSize() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lotSize', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByLotSizeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lotSize', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByLowPrice() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lowPrice', Sort.asc);
@@ -3912,6 +5166,30 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByLowPriceDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lowPrice', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByMae() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mae', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByMaeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mae', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByMfe() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mfe', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByMfeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mfe', Sort.desc);
     });
   }
 
@@ -3939,6 +5217,30 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByPips() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pips', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByPipsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pips', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByPlannedRRR() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'plannedRRR', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByPlannedRRRDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'plannedRRR', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByPnl() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pnl', Sort.asc);
@@ -3963,15 +5265,15 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
     });
   }
 
-  QueryBuilder<Trade, Trade, QAfterSortBy> sortByRiskRewardRatio() {
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByPortfolioId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'riskRewardRatio', Sort.asc);
+      return query.addSortBy(r'portfolioId', Sort.asc);
     });
   }
 
-  QueryBuilder<Trade, Trade, QAfterSortBy> sortByRiskRewardRatioDesc() {
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByPortfolioIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'riskRewardRatio', Sort.desc);
+      return query.addSortBy(r'portfolioId', Sort.desc);
     });
   }
 
@@ -3984,6 +5286,18 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> sortBySessionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'session', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortBySlippage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'slippage', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortBySlippageDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'slippage', Sort.desc);
     });
   }
 
@@ -4008,18 +5322,6 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByStopLossPriceDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'stopLossPrice', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterSortBy> sortByStrategy() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'strategy', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterSortBy> sortByStrategyDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'strategy', Sort.desc);
     });
   }
 
@@ -4085,6 +5387,18 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
 }
 
 extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByActualRRR() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'actualRRR', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByActualRRRDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'actualRRR', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'amount', Sort.asc);
@@ -4094,6 +5408,18 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByAmountDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'amount', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByAssetClass() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'assetClass', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByAssetClassDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'assetClass', Sort.desc);
     });
   }
 
@@ -4229,6 +5555,30 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByExpectedEntryPrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'expectedEntryPrice', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByExpectedEntryPriceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'expectedEntryPrice', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByFundingFee() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fundingFee', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByFundingFeeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'fundingFee', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByHighPrice() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'highPrice', Sort.asc);
@@ -4277,6 +5627,30 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByLiquidationPrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'liquidationPrice', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByLiquidationPriceDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'liquidationPrice', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByLotSize() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lotSize', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByLotSizeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'lotSize', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByLowPrice() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lowPrice', Sort.asc);
@@ -4286,6 +5660,30 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByLowPriceDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'lowPrice', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByMae() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mae', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByMaeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mae', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByMfe() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mfe', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByMfeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'mfe', Sort.desc);
     });
   }
 
@@ -4313,6 +5711,30 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByPips() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pips', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByPipsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pips', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByPlannedRRR() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'plannedRRR', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByPlannedRRRDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'plannedRRR', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByPnl() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'pnl', Sort.asc);
@@ -4337,15 +5759,15 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
     });
   }
 
-  QueryBuilder<Trade, Trade, QAfterSortBy> thenByRiskRewardRatio() {
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByPortfolioId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'riskRewardRatio', Sort.asc);
+      return query.addSortBy(r'portfolioId', Sort.asc);
     });
   }
 
-  QueryBuilder<Trade, Trade, QAfterSortBy> thenByRiskRewardRatioDesc() {
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByPortfolioIdDesc() {
     return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'riskRewardRatio', Sort.desc);
+      return query.addSortBy(r'portfolioId', Sort.desc);
     });
   }
 
@@ -4358,6 +5780,18 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> thenBySessionDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'session', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenBySlippage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'slippage', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenBySlippageDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'slippage', Sort.desc);
     });
   }
 
@@ -4382,18 +5816,6 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByStopLossPriceDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'stopLossPrice', Sort.desc);
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterSortBy> thenByStrategy() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'strategy', Sort.asc);
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QAfterSortBy> thenByStrategyDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'strategy', Sort.desc);
     });
   }
 
@@ -4459,6 +5881,12 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
 }
 
 extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
+  QueryBuilder<Trade, Trade, QDistinct> distinctByActualRRR() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'actualRRR');
+    });
+  }
+
   QueryBuilder<Trade, Trade, QDistinct> distinctByAfterExitScreenshots() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'afterExitScreenshots');
@@ -4468,6 +5896,12 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
   QueryBuilder<Trade, Trade, QDistinct> distinctByAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'amount');
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctByAssetClass() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'assetClass');
     });
   }
 
@@ -4493,6 +5927,12 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
   QueryBuilder<Trade, Trade, QDistinct> distinctByConfidence() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'confidence');
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctByConfluences() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'confluences');
     });
   }
 
@@ -4545,6 +5985,18 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QDistinct> distinctByExpectedEntryPrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'expectedEntryPrice');
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctByFundingFee() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'fundingFee');
+    });
+  }
+
   QueryBuilder<Trade, Trade, QDistinct> distinctByHighPrice() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'highPrice');
@@ -4563,9 +6015,33 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QDistinct> distinctByLiquidationPrice() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'liquidationPrice');
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctByLotSize() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'lotSize');
+    });
+  }
+
   QueryBuilder<Trade, Trade, QDistinct> distinctByLowPrice() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'lowPrice');
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctByMae() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'mae');
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctByMfe() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'mfe');
     });
   }
 
@@ -4583,6 +6059,18 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QDistinct> distinctByPips() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'pips');
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctByPlannedRRR() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'plannedRRR');
+    });
+  }
+
   QueryBuilder<Trade, Trade, QDistinct> distinctByPnl() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'pnl');
@@ -4595,9 +6083,9 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
     });
   }
 
-  QueryBuilder<Trade, Trade, QDistinct> distinctByRiskRewardRatio() {
+  QueryBuilder<Trade, Trade, QDistinct> distinctByPortfolioId() {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'riskRewardRatio');
+      return query.addDistinctBy(r'portfolioId');
     });
   }
 
@@ -4605,6 +6093,12 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'session', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctBySlippage() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'slippage');
     });
   }
 
@@ -4617,13 +6111,6 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
   QueryBuilder<Trade, Trade, QDistinct> distinctByStopLossPrice() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'stopLossPrice');
-    });
-  }
-
-  QueryBuilder<Trade, Trade, QDistinct> distinctByStrategy(
-      {bool caseSensitive = true}) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'strategy', caseSensitive: caseSensitive);
     });
   }
 
@@ -4665,6 +6152,12 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Trade, double?, QQueryOperations> actualRRRProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'actualRRR');
+    });
+  }
+
   QueryBuilder<Trade, List<String>?, QQueryOperations>
       afterExitScreenshotsProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -4675,6 +6168,12 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
   QueryBuilder<Trade, double, QQueryOperations> amountProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'amount');
+    });
+  }
+
+  QueryBuilder<Trade, AssetClass, QQueryOperations> assetClassProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'assetClass');
     });
   }
 
@@ -4700,6 +6199,12 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
   QueryBuilder<Trade, int?, QQueryOperations> confidenceProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'confidence');
+    });
+  }
+
+  QueryBuilder<Trade, List<String>?, QQueryOperations> confluencesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'confluences');
     });
   }
 
@@ -4751,6 +6256,18 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Trade, double?, QQueryOperations> expectedEntryPriceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'expectedEntryPrice');
+    });
+  }
+
+  QueryBuilder<Trade, double?, QQueryOperations> fundingFeeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'fundingFee');
+    });
+  }
+
   QueryBuilder<Trade, double?, QQueryOperations> highPriceProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'highPrice');
@@ -4769,9 +6286,33 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Trade, double?, QQueryOperations> liquidationPriceProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'liquidationPrice');
+    });
+  }
+
+  QueryBuilder<Trade, double?, QQueryOperations> lotSizeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'lotSize');
+    });
+  }
+
   QueryBuilder<Trade, double?, QQueryOperations> lowPriceProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'lowPrice');
+    });
+  }
+
+  QueryBuilder<Trade, double?, QQueryOperations> maeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'mae');
+    });
+  }
+
+  QueryBuilder<Trade, double?, QQueryOperations> mfeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'mfe');
     });
   }
 
@@ -4787,6 +6328,25 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Trade, List<PartialExit>?, QQueryOperations>
+      partialExitsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'partialExits');
+    });
+  }
+
+  QueryBuilder<Trade, double?, QQueryOperations> pipsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'pips');
+    });
+  }
+
+  QueryBuilder<Trade, double?, QQueryOperations> plannedRRRProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'plannedRRR');
+    });
+  }
+
   QueryBuilder<Trade, double, QQueryOperations> pnlProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pnl');
@@ -4799,15 +6359,21 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Trade, double?, QQueryOperations> riskRewardRatioProperty() {
+  QueryBuilder<Trade, int?, QQueryOperations> portfolioIdProperty() {
     return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'riskRewardRatio');
+      return query.addPropertyName(r'portfolioId');
     });
   }
 
   QueryBuilder<Trade, String?, QQueryOperations> sessionProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'session');
+    });
+  }
+
+  QueryBuilder<Trade, double?, QQueryOperations> slippageProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'slippage');
     });
   }
 
@@ -4820,12 +6386,6 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
   QueryBuilder<Trade, double?, QQueryOperations> stopLossPriceProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'stopLossPrice');
-    });
-  }
-
-  QueryBuilder<Trade, String?, QQueryOperations> strategyProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'strategy');
     });
   }
 
@@ -4859,3 +6419,328 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
     });
   }
 }
+
+// **************************************************************************
+// IsarEmbeddedGenerator
+// **************************************************************************
+
+// coverage:ignore-file
+// ignore_for_file: duplicate_ignore, non_constant_identifier_names, constant_identifier_names, invalid_use_of_protected_member, unnecessary_cast, prefer_const_constructors, lines_longer_than_80_chars, require_trailing_commas, inference_failure_on_function_invocation, unnecessary_parenthesis, unnecessary_raw_strings, unnecessary_null_checks, join_return_with_assignment, prefer_final_locals, avoid_js_rounded_ints, avoid_positional_boolean_parameters, always_specify_types
+
+const PartialExitSchema = Schema(
+  name: r'PartialExit',
+  id: -9012127804192867752,
+  properties: {
+    r'amount': PropertySchema(
+      id: 0,
+      name: r'amount',
+      type: IsarType.double,
+    ),
+    r'date': PropertySchema(
+      id: 1,
+      name: r'date',
+      type: IsarType.dateTime,
+    ),
+    r'exitPrice': PropertySchema(
+      id: 2,
+      name: r'exitPrice',
+      type: IsarType.double,
+    )
+  },
+  estimateSize: _partialExitEstimateSize,
+  serialize: _partialExitSerialize,
+  deserialize: _partialExitDeserialize,
+  deserializeProp: _partialExitDeserializeProp,
+);
+
+int _partialExitEstimateSize(
+  PartialExit object,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  var bytesCount = offsets.last;
+  return bytesCount;
+}
+
+void _partialExitSerialize(
+  PartialExit object,
+  IsarWriter writer,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  writer.writeDouble(offsets[0], object.amount);
+  writer.writeDateTime(offsets[1], object.date);
+  writer.writeDouble(offsets[2], object.exitPrice);
+}
+
+PartialExit _partialExitDeserialize(
+  Id id,
+  IsarReader reader,
+  List<int> offsets,
+  Map<Type, List<int>> allOffsets,
+) {
+  final object = PartialExit(
+    amount: reader.readDoubleOrNull(offsets[0]),
+    date: reader.readDateTimeOrNull(offsets[1]),
+    exitPrice: reader.readDoubleOrNull(offsets[2]),
+  );
+  return object;
+}
+
+P _partialExitDeserializeProp<P>(
+  IsarReader reader,
+  int propertyId,
+  int offset,
+  Map<Type, List<int>> allOffsets,
+) {
+  switch (propertyId) {
+    case 0:
+      return (reader.readDoubleOrNull(offset)) as P;
+    case 1:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 2:
+      return (reader.readDoubleOrNull(offset)) as P;
+    default:
+      throw IsarError('Unknown property with id $propertyId');
+  }
+}
+
+extension PartialExitQueryFilter
+    on QueryBuilder<PartialExit, PartialExit, QFilterCondition> {
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition> amountIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'amount',
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition>
+      amountIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'amount',
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition> amountEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'amount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition>
+      amountGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'amount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition> amountLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'amount',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition> amountBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'amount',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition> dateIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'date',
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition>
+      dateIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'date',
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition> dateEqualTo(
+      DateTime? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'date',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition> dateGreaterThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'date',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition> dateLessThan(
+    DateTime? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'date',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition> dateBetween(
+    DateTime? lower,
+    DateTime? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'date',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition>
+      exitPriceIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'exitPrice',
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition>
+      exitPriceIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'exitPrice',
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition>
+      exitPriceEqualTo(
+    double? value, {
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'exitPrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition>
+      exitPriceGreaterThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'exitPrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition>
+      exitPriceLessThan(
+    double? value, {
+    bool include = false,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'exitPrice',
+        value: value,
+        epsilon: epsilon,
+      ));
+    });
+  }
+
+  QueryBuilder<PartialExit, PartialExit, QAfterFilterCondition>
+      exitPriceBetween(
+    double? lower,
+    double? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    double epsilon = Query.epsilon,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'exitPrice',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        epsilon: epsilon,
+      ));
+    });
+  }
+}
+
+extension PartialExitQueryObject
+    on QueryBuilder<PartialExit, PartialExit, QFilterCondition> {}

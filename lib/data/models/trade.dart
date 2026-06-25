@@ -4,6 +4,7 @@ part 'trade.g.dart';
 
 enum TradeDirection { long, short }
 enum TradeStatus { won, lost, breakEven, pending, open }
+enum AssetClass { forex, cryptoSpot, cryptoFutures }
 
 @collection
 class Trade {
@@ -16,6 +17,11 @@ class Trade {
   @enumerated
   late TradeDirection direction;
 
+  @enumerated
+  late AssetClass assetClass;
+
+  int? portfolioId;
+
   late double entryPrice;
   double? exitPrice;
   late double amount;
@@ -25,6 +31,12 @@ class Trade {
   double commission = 0.0;
   double swap = 0.0;
 
+  // === ASSET CLASS SPECIFIC FIELDS ===
+  double? lotSize;          // For Forex
+  double? pips;             // For Forex
+  double? liquidationPrice; // For Crypto Futures
+  double? fundingFee;       // For Crypto Futures
+
   @enumerated
   late TradeStatus status;
 
@@ -32,7 +44,6 @@ class Trade {
 
   @Index()
   late DateTime date;
-  String? strategy;
   String? notes;
 
   // === PSYCHOLOGICAL FACTORS ===
@@ -65,7 +76,20 @@ class Trade {
   // Risk metrics
   double? stopLossPrice;
   double? takeProfitPrice;
-  double? riskRewardRatio;
+  double? plannedRRR; // Formerly riskRewardRatio
+  double? actualRRR;
+  double? mae; // Maximum Adverse Excursion
+  double? mfe; // Maximum Favorable Excursion
+
+  // Execution Metrics
+  double? expectedEntryPrice;
+  double? slippage; // Difference between expected and actual entry
+
+  // Confluences (Replaces single strategy)
+  List<String>? confluences;
+
+  // Partial Exits
+  List<PartialExit>? partialExits;
 
   // === CHART SCREENSHOTS ===
   // List of file paths untuk screenshot sebelum entry
@@ -87,7 +111,12 @@ class Trade {
     required this.pnlPercentage,
     required this.status,
     required this.date,
-    this.strategy,
+    this.assetClass = AssetClass.cryptoSpot,
+    this.portfolioId,
+    this.lotSize,
+    this.pips,
+    this.liquidationPrice,
+    this.fundingFee,
     this.notes,
     this.emotion,
     this.session,
@@ -105,7 +134,14 @@ class Trade {
     this.durationHours,
     this.stopLossPrice,
     this.takeProfitPrice,
-    this.riskRewardRatio,
+    this.plannedRRR,
+    this.actualRRR,
+    this.mae,
+    this.mfe,
+    this.expectedEntryPrice,
+    this.slippage,
+    this.confluences,
+    this.partialExits,
     this.beforeEntryScreenshots,
     this.afterExitScreenshots,
   });
@@ -129,4 +165,17 @@ class Trade {
     // Anomaly jika imbalance > 0.7 atau < 0.3
     return volumeImbalance! > 0.7 || volumeImbalance! < 0.3;
   }
+}
+
+@embedded
+class PartialExit {
+  double? exitPrice;
+  double? amount; // Amount or lot size closed
+  DateTime? date;
+
+  PartialExit({
+    this.exitPrice,
+    this.amount,
+    this.date,
+  });
 }
